@@ -1,0 +1,1 @@
+export default function ProductDetail() { return <div className="container-main py-12"><h1 className="section-title">Product Detail</h1><p className="text-muted">Product detail — Sprint 2</p></div>; }

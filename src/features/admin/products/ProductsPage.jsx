@@ -1,0 +1,1 @@
+export default function ProductsPage() { return <div className="card p-6"><h2 className="text-xl font-bold text-secondary mb-2">Products Management</h2><p className="text-muted text-sm">Product CRUD — Sprint 4</p></div>; }

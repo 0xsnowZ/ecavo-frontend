@@ -1,0 +1,1 @@
+export default function OrdersPage() { return <div className="card p-6"><h2 className="text-xl font-bold text-secondary mb-2">Orders Management</h2><p className="text-muted text-sm">Full CRUD orders table — Sprint 4</p></div>; }

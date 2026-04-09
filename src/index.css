@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --header-height: 64px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html[dir='rtl'] {
+    font-family: 'Cairo', system-ui, sans-serif;
+  }
+
+  html[dir='ltr'] {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-surface text-dark antialiased;
+  }
+
+  * {
+    @apply box-border;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}
+
+@layer components {
+  /* Container */
+  .container-main {
+    @apply max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-hover text-white font-semibold px-6 py-2.5 rounded-lg
+           transition-all duration-200 ease-smooth inline-flex items-center gap-2
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary-hover text-white font-semibold px-6 py-2.5 rounded-lg
+           transition-all duration-200 ease-smooth inline-flex items-center gap-2
+           active:scale-95;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold px-6 py-2.5 rounded-lg
+           transition-all duration-200 ease-smooth inline-flex items-center gap-2;
+  }
+
+  .btn-ghost {
+    @apply text-muted hover:text-dark hover:bg-gray-100 font-medium px-4 py-2 rounded-lg
+           transition-all duration-200 ease-smooth inline-flex items-center gap-2;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-xl shadow-card hover:shadow-hover transition-shadow duration-300;
+  }
+
+  /* Badge */
+  .badge-discount {
+    @apply bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-md absolute top-2 start-2 z-10;
+  }
+
+  .badge-new {
+    @apply bg-secondary text-white text-xs font-bold px-2 py-0.5 rounded-md absolute top-2 start-2 z-10;
+  }
+
+  /* Form inputs */
+  .input-field {
+    @apply w-full border border-border rounded-lg px-4 py-2.5 text-sm
+           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
+           transition-colors duration-200 bg-white placeholder:text-gray-400;
+  }
+
+  /* Section heading */
+  .section-title {
+    @apply text-2xl font-bold text-secondary relative pb-3 mb-6 inline-block;
+  }
+  .section-title::after {
+    content: '';
+    @apply absolute bottom-0 start-0 w-12 h-1 bg-primary rounded-full;
+  }
+
+  /* Product card hover image swap */
+  .product-img-wrapper {
+    @apply relative overflow-hidden;
+  }
+  .product-img-wrapper img.hover-img {
+    @apply absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300;
+  }
+  .product-img-wrapper:hover img.hover-img {
+    @apply opacity-100;
+  }
+  .product-img-wrapper:hover img.primary-img {
+    @apply opacity-0;
+  }
+
+  /* Glass effect hover overlay */
+  .glass-hover {
+    @apply absolute inset-0 bg-white/10 backdrop-blur-[1px] opacity-0 hover:opacity-100
+           transition-opacity duration-300;
+  }
+
+  /* Admin sidebar link */
+  .admin-nav-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium
+           text-gray-600 hover:bg-primary/10 hover:text-primary transition-all duration-200;
+  }
+  .admin-nav-link.active {
+    @apply bg-primary/10 text-primary;
+  }
+
+  /* Status badges */
+  .status-badge {
+    @apply text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* RTL flip for icons that need it */
+  html[dir='rtl'] .rtl-flip {
+    transform: scaleX(-1);
+  }
+}

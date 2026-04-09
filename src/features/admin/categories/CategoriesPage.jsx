@@ -1,0 +1,1 @@
+export default function CategoriesPage() { return <div className="card p-6"><h2 className="text-xl font-bold text-secondary mb-2">Categories Management</h2><p className="text-muted text-sm">Category CRUD — Sprint 4</p></div>; }
