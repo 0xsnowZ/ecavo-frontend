@@ -4,6 +4,7 @@ import { Trash2, Minus, Plus, ShoppingBag, Tag, X, ArrowRight } from 'lucide-rea
 import { useState } from 'react';
 import { useCartStore } from '../store/useCartStore';
 import { useLocaleStore } from '../store/useLocaleStore';
+import { getLocalized } from '../utils/localize';
 
 export default function Cart() {
   const { t, i18n } = useTranslation();
@@ -81,7 +82,7 @@ export default function Cart() {
                   <Link to={`/products/${item.product.slug}`}>
                     <img
                       src={item.product.images?.[0]}
-                      alt={item.product.name}
+                      alt={getLocalized(item.product, 'name', i18n.language)}
                       className="w-16 h-16 object-contain rounded-xl bg-gray-50 p-1"
                     />
                   </Link>
@@ -90,7 +91,7 @@ export default function Cart() {
                       to={`/products/${item.product.slug}`}
                       className="text-sm font-semibold text-dark hover:text-primary transition-colors line-clamp-2"
                     >
-                      {item.product.name}
+                      {getLocalized(item.product, 'name', i18n.language)}
                     </Link>
                     {item.variant && (
                       <p className="text-xs text-muted mt-0.5">

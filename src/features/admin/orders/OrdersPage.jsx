@@ -1,3 +1,4 @@
+import { useLocaleStore } from '../../../store/useLocaleStore';
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, RefreshCw, ChevronDown, X, Loader2 } from 'lucide-react';
@@ -5,41 +6,41 @@ import { adminService } from '../../../services';
 import Spinner from '../../../components/ui/Spinner';
 
 const ALL_STATUSES = [
-  'placed','preparing','awaiting_shipment','shipped','in_transit','delivered',
-  'no_answer','postponed','wrong_address','cancelled','returned'
+  'placed', 'preparing', 'awaiting_shipment', 'shipped', 'in_transit', 'delivered',
+  'no_answer', 'postponed', 'wrong_address', 'cancelled', 'returned'
 ];
 
 const STATUS_LABEL_AR = {
-  placed:'تم الطلب', preparing:'يتم التجهيز', awaiting_shipment:'انتظار الشحن',
-  shipped:'تم الشحن', in_transit:'في الطريق', delivered:'تم الاستلام',
-  no_answer:'لا يرد', postponed:'مؤجل', wrong_address:'عنوان خاطئ',
-  cancelled:'ملغي', returned:'مرتجع',
+  placed: 'تم الطلب', preparing: 'يتم التجهيز', awaiting_shipment: 'انتظار الشحن',
+  shipped: 'تم الشحن', in_transit: 'في الطريق', delivered: 'تم الاستلام',
+  no_answer: 'لا يرد', postponed: 'مؤجل', wrong_address: 'عنوان خاطئ',
+  cancelled: 'ملغي', returned: 'مرتجع',
 };
 
 const STATUS_COLOR = {
-  placed:'bg-blue-100 text-blue-700', preparing:'bg-indigo-100 text-indigo-700',
-  awaiting_shipment:'bg-yellow-100 text-yellow-700', shipped:'bg-teal-100 text-teal-700',
-  in_transit:'bg-purple-100 text-purple-700', delivered:'bg-green-100 text-green-700',
-  no_answer:'bg-orange-100 text-orange-700', postponed:'bg-gray-100 text-gray-500',
-  wrong_address:'bg-red-100 text-red-500', cancelled:'bg-red-100 text-red-600',
-  returned:'bg-pink-100 text-pink-700',
+  placed: 'bg-blue-100 text-blue-700', preparing: 'bg-indigo-100 text-indigo-700',
+  awaiting_shipment: 'bg-yellow-100 text-yellow-700', shipped: 'bg-teal-100 text-teal-700',
+  in_transit: 'bg-purple-100 text-purple-700', delivered: 'bg-green-100 text-green-700',
+  no_answer: 'bg-orange-100 text-orange-700', postponed: 'bg-gray-100 text-gray-500',
+  wrong_address: 'bg-red-100 text-red-500', cancelled: 'bg-red-100 text-red-600',
+  returned: 'bg-pink-100 text-pink-700',
 };
 
 export default function OrdersPage() {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const { language } = useLocaleStore(); const isAr = language === 'ar';
 
-  const [orders, setOrders]       = useState([]);
-  const [meta, setMeta]           = useState({ total: 0, last_page: 1, current_page: 1 });
-  const [loading, setLoading]     = useState(true);
-  const [search, setSearch]       = useState('');
+  const [orders, setOrders] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, last_page: 1, current_page: 1 });
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [filterStatus, setFilter] = useState('');
-  const [page, setPage]           = useState(1);
+  const [page, setPage] = useState(1);
 
   // Status update modal
-  const [editOrder, setEditOrder]       = useState(null);
-  const [newStatus, setNewStatus]       = useState('');
-  const [updating, setUpdating]         = useState(false);
+  const [editOrder, setEditOrder] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [updating, setUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState('');
 
   const fetchOrders = useCallback(() => {
@@ -49,7 +50,7 @@ export default function OrdersPage() {
         setOrders(r.data.data || []);
         setMeta(r.data.meta || {});
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [search, filterStatus, page]);
 
@@ -101,7 +102,7 @@ export default function OrdersPage() {
         >
           <option value="">{isAr ? 'جميع الحالات' : 'All Statuses'}</option>
           {ALL_STATUSES.map(s => (
-            <option key={s} value={s}>{isAr ? STATUS_LABEL_AR[s] : s.replace(/_/g,' ')}</option>
+            <option key={s} value={s}>{isAr ? STATUS_LABEL_AR[s] : s.replace(/_/g, ' ')}</option>
           ))}
         </select>
         <button onClick={fetchOrders} className="btn-ghost px-3" title="Refresh">
@@ -115,13 +116,13 @@ export default function OrdersPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface">
               <tr>
-                {['#', isAr?'العميل':'Customer', isAr?'الهاتف':'Phone',
-                  isAr?'الإجمالي':'Total', isAr?'الحالة':'Status',
-                  isAr?'التاريخ':'Date', isAr?'إجراء':'Action'].map(h => (
-                  <th key={h} className="text-start px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">
-                    {h}
-                  </th>
-                ))}
+                {['#', isAr ? 'العميل' : 'Customer', isAr ? 'الهاتف' : 'Phone',
+                  isAr ? 'الإجمالي' : 'Total', isAr ? 'الحالة' : 'Status',
+                  isAr ? 'التاريخ' : 'Date', isAr ? 'إجراء' : 'Action'].map(h => (
+                    <th key={h} className="text-start px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">
+                      {h}
+                    </th>
+                  ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -138,8 +139,8 @@ export default function OrdersPage() {
                   <td className="px-4 py-3 text-muted">{order.guest_phone || '—'}</td>
                   <td className="px-4 py-3 font-bold text-primary">${parseFloat(order.total).toFixed(2)}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${STATUS_COLOR[order.status]||'bg-gray-100 text-gray-600'}`}>
-                      {isAr ? STATUS_LABEL_AR[order.status] : order.status.replace(/_/g,' ')}
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${STATUS_COLOR[order.status] || 'bg-gray-100 text-gray-600'}`}>
+                      {isAr ? STATUS_LABEL_AR[order.status] : order.status.replace(/_/g, ' ')}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-muted text-xs whitespace-nowrap">

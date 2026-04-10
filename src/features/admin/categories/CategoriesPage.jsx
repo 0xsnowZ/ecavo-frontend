@@ -1,29 +1,31 @@
+import { useLocaleStore } from '../../../store/useLocaleStore';
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, X, Loader2, RefreshCw, Tag } from 'lucide-react';
 import { adminService } from '../../../services';
 import Spinner from '../../../components/ui/Spinner';
+import { getLocalized } from '../../../utils/localize';
 
-const EMPTY_FORM = { name_ar: '', name_en: '', parent_id: '', sort_order: 0, is_active: true };
+const EMPTY_FORM = { name_ar: '', name_en: '', name_fr: '', parent_id: '', sort_order: 0, is_active: true };
 
 export default function CategoriesPage() {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const { language } = useLocaleStore(); const isAr = language === 'ar';
 
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [modal, setModal]           = useState(null);
-  const [editCat, setEditCat]       = useState(null);
-  const [form, setForm]             = useState(EMPTY_FORM);
-  const [saving, setSaving]         = useState(false);
-  const [errors, setErrors]         = useState({});
-  const [deleting, setDeleting]     = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null);
+  const [editCat, setEditCat] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [deleting, setDeleting] = useState(null);
 
   const fetchCategories = useCallback(() => {
     setLoading(true);
     adminService.categories.list()
       .then(r => setCategories(r.data.data || []))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
@@ -38,7 +40,7 @@ export default function CategoriesPage() {
 
   const openEdit = (cat) => {
     setForm({
-      name_ar: cat.name_ar || '', name_en: cat.name_en || '',
+      name_ar: cat.name_ar || '', name_en: cat.name_en || '', name_fr: cat.name_fr || '',
       parent_id: cat.parent_id || '', sort_order: cat.sort_order || 0,
       is_active: cat.is_active ?? true,
     });
@@ -106,8 +108,8 @@ export default function CategoriesPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface">
               <tr>
-                {[isAr?'القسم':'Category', isAr?'الرابط':'Slug', isAr?'الترتيب':'Order',
-                  isAr?'الحالة':'Status', isAr?'المنتجات':'Products', isAr?'إجراء':'Actions'].map(h => (
+                {[isAr ? 'القسم' : 'Category', isAr ? 'الرابط' : 'Slug', isAr ? 'الترتيب' : 'Order',
+                isAr ? 'الحالة' : 'Status', isAr ? 'المنتجات' : 'Products', isAr ? 'إجراء' : 'Actions'].map(h => (
                   <th key={h} className="text-start px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
                     {h}
                   </th>
@@ -130,8 +132,10 @@ export default function CategoriesPage() {
                         <Tag size={14} className="text-primary" />
                       </div>
                       <div>
-                        <p className="font-semibold text-dark">{isAr ? cat.name_ar : cat.name_en}</p>
-                        <p className="text-xs text-muted">{isAr ? cat.name_en : cat.name_ar}</p>
+                        <p className="font-semibold text-dark">{getLocalized(cat, 'name', language)}</p>
+                        <p className="text-xs text-muted">
+                          {language === 'ar' ? cat.name_en : cat.name_ar}
+                        </p>
                       </div>
                     </div>
                   </td>
@@ -179,6 +183,7 @@ export default function CategoriesPage() {
               {[
                 { key: 'name_ar', label: isAr ? 'الاسم بالعربية' : 'Arabic Name' },
                 { key: 'name_en', label: isAr ? 'الاسم بالإنجليزية' : 'English Name' },
+                { key: 'name_fr', label: isAr ? 'الاسم بالفرنسية' : 'French Name' },
               ].map(({ key, label }) => (
                 <div key={key}>
                   <label className="block text-xs font-semibold text-muted mb-1">{label}</label>
@@ -196,7 +201,7 @@ export default function CategoriesPage() {
                 <select value={form.parent_id} onChange={e => setField('parent_id', e.target.value)} className="input-field">
                   <option value="">{isAr ? 'بدون أب' : 'No parent (root)'}</option>
                   {categories.filter(c => !editCat || c.id !== editCat.id).map(c => (
-                    <option key={c.id} value={c.id}>{isAr ? c.name_ar : c.name_en}</option>
+                    <option key={c.id} value={c.id}>{getLocalized(c, 'name', language)}</option>
                   ))}
                 </select>
               </div>

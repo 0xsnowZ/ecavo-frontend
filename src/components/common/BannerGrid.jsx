@@ -12,7 +12,7 @@ export default function BannerGrid({ banners, cols = 3 }) {
         <Link
           key={i}
           to={to || '/products'}
-          className="relative rounded-xl overflow-hidden group block"
+          className="relative rounded-lg overflow-hidden group block"
         >
           <img
             src={src}

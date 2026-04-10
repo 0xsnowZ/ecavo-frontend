@@ -5,6 +5,7 @@ import { ChevronRight, Tag, ArrowRight } from 'lucide-react';
 import { categoriesService } from '../services';
 import Skeleton from '../components/ui/Skeleton';
 import SEO from '../components/common/SEO';
+import { getLocalized } from '../utils/localize';
 
 // Category color palette — cycles through for visual variety
 const PALETTE = [
@@ -89,10 +90,10 @@ export default function Categories() {
                   {/* Name */}
                   <div>
                     <p className="font-bold text-dark group-hover:text-primary transition-colors">
-                      {isAr ? cat.name_ar : cat.name_en}
+                      {getLocalized(cat, 'name', i18n.language)}
                     </p>
                     <p className="text-xs text-muted mt-0.5">
-                      {isAr ? cat.name_en : cat.name_ar}
+                      {i18n.language === 'ar' ? cat.name_en : cat.name_ar}
                     </p>
                   </div>
 
@@ -119,7 +120,7 @@ export default function Categories() {
             {categories.filter(c => c.children?.length > 0).map(parent => (
               <div key={parent.id}>
                 <h3 className="text-sm font-bold text-muted uppercase tracking-wider mb-3">
-                  {isAr ? parent.name_ar : parent.name_en}
+                  {getLocalized(parent, 'name', i18n.language)}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {parent.children.map(child => (
@@ -129,7 +130,7 @@ export default function Categories() {
                       className="px-4 py-1.5 rounded-full border border-border text-sm text-dark
                                  hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
                     >
-                      {isAr ? child.name_ar : child.name_en}
+                      {getLocalized(child, 'name', i18n.language)}
                     </Link>
                   ))}
                 </div>

@@ -14,7 +14,7 @@ const SLIDES = [slide1, slide2, slide3, slide4, slide5];
 
 export default function HeroSlider() {
   return (
-    <div className="rounded-2xl overflow-hidden shadow-card flex-1">
+    <div className="rounded-lg overflow-hidden shadow-card flex-1">
       <Swiper
         modules={[Autoplay, Pagination, Navigation]}
         spaceBetween={0}

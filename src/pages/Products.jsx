@@ -7,6 +7,7 @@ import ProductCard from '../components/product/ProductCard';
 import Skeleton from '../components/ui/Skeleton';
 import SEO from '../components/common/SEO';
 import { resolveImages } from '../utils/imageUrl';
+import { getLocalized } from '../utils/localize';
 
 const SORT_OPTIONS = [
   { value: 'latest',     labelAr: 'الأحدث',        labelEn: 'Latest' },
@@ -75,14 +76,14 @@ export default function Products() {
           >
             {isAr ? 'الكل' : 'All'}
           </button>
-          {categories.map(c => (
+            {categories.map(c => (
             <button
               key={c.slug}
               onClick={() => setParam('category', c.slug)}
               className={`w-full text-start px-3 py-2 rounded-lg text-sm transition-colors
                 ${category === c.slug ? 'bg-primary/10 text-primary font-semibold' : 'text-dark hover:bg-gray-100'}`}
             >
-              {isAr ? c.name_ar : c.name_en}
+              {getLocalized(c, 'name', i18n.language)}
             </button>
           ))}
         </div>
@@ -226,7 +227,9 @@ export default function Products() {
                   product={{
                     id: p.id,
                     slug: p.slug,
-                    name: isAr ? p.name_ar : p.name_en,
+                    name_ar: p.name_ar,
+                    name_en: p.name_en,
+                    name_fr: p.name_fr,
                     price: parseFloat(p.price),
                     originalPrice: p.original_price ? parseFloat(p.original_price) : null,
                     discountPercent: p.discount_percent,

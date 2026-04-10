@@ -6,6 +6,7 @@ import { useWishlistStore } from '../store/useWishlistStore';
 import { useCartStore } from '../store/useCartStore';
 import { useLocaleStore } from '../store/useLocaleStore';
 import StarRating from '../components/ui/StarRating';
+import { getLocalized } from '../utils/localize';
 
 export default function Wishlist() {
   const { t, i18n } = useTranslation();
@@ -69,7 +70,7 @@ export default function Wishlist() {
             <Link to={`/products/${product.slug}`} className="block h-44 bg-gray-50 p-4 overflow-hidden">
               <img
                 src={product.images?.[0]}
-                alt={product.name}
+                alt={getLocalized(product, 'name', i18n.language)}
                 className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                 loading="lazy"
               />
@@ -81,7 +82,7 @@ export default function Wishlist() {
                 to={`/products/${product.slug}`}
                 className="text-sm font-semibold text-dark hover:text-primary transition-colors line-clamp-2"
               >
-                {product.name}
+                {getLocalized(product, 'name', i18n.language)}
               </Link>
 
               {product.rating !== undefined && (

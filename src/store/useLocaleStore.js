@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import i18n from '../i18n';
 
 // Static fallback rates (USD base). Refreshed from open.er-api.com on mount.
 const FALLBACK_RATES = {
@@ -25,6 +26,7 @@ const CURRENCIES = [
 const LANGUAGES = [
   { code: 'ar', label: 'العربية',  flag: '🇲🇦', dir: 'rtl' },
   { code: 'en', label: 'English',  flag: '🇬🇧', dir: 'ltr' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷', dir: 'ltr' },
 ];
 
 const useLocaleStore = create(
@@ -42,6 +44,7 @@ const useLocaleStore = create(
         const lang = LANGUAGES.find(l => l.code === code);
         if (!lang) return;
         set({ language: code });
+        i18n.changeLanguage(code);
         document.documentElement.setAttribute('dir', lang.dir);
         document.documentElement.setAttribute('lang', code);
       },

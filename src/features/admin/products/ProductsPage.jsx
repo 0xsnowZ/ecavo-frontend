@@ -1,3 +1,4 @@
+import { useLocaleStore } from '../../../store/useLocaleStore';
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Search, Edit2, Trash2, X, Loader2, RefreshCw, Image } from 'lucide-react';
@@ -5,9 +6,10 @@ import { adminService, categoriesService } from '../../../services';
 import Spinner from '../../../components/ui/Spinner';
 import ImageUploader from '../../../components/admin/ImageUploader';
 import { resolveImageUrl } from '../../../utils/imageUrl';
+import { getLocalized } from '../../../utils/localize';
 
 const EMPTY_FORM = {
-  name_ar: '', name_en: '', description_ar: '', description_en: '',
+  name_ar: '', name_en: '', name_fr: '', description_ar: '', description_en: '', description_fr: '',
   price: '', original_price: '', discount_percent: '', stock: '',
   category_id: '', is_active: true, is_featured: false, deal_ends_at: '',
   images: [],
@@ -15,30 +17,30 @@ const EMPTY_FORM = {
 
 export default function ProductsPage() {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const { language } = useLocaleStore(); const isAr = language === 'ar';
 
-  const [products, setProducts]   = useState([]);
+  const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [meta, setMeta]           = useState({});
-  const [loading, setLoading]     = useState(true);
-  const [search, setSearch]       = useState('');
-  const [page, setPage]           = useState(1);
+  const [meta, setMeta] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   // Modal
-  const [modal, setModal]         = useState(null); // null | 'create' | 'edit'
-  const [editProduct, setEdit]    = useState(null);
-  const [form, setForm]           = useState(EMPTY_FORM);
-  const [saving, setSaving]       = useState(false);
-  const [errors, setErrors]       = useState({});
+  const [modal, setModal] = useState(null); // null | 'create' | 'edit'
+  const [editProduct, setEdit] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
 
   // Delete confirmation
-  const [deleting, setDeleting]   = useState(null);
+  const [deleting, setDeleting] = useState(null);
 
   const fetchProducts = useCallback(() => {
     setLoading(true);
     adminService.products.list({ search, page, per_page: 20 })
       .then(r => { setProducts(r.data.data || []); setMeta(r.data.meta || {}); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [search, page]);
 
@@ -56,8 +58,8 @@ export default function ProductsPage() {
 
   const openEdit = (product) => {
     setForm({
-      name_ar: product.name_ar || '', name_en: product.name_en || '',
-      description_ar: product.description_ar || '', description_en: product.description_en || '',
+      name_ar: product.name_ar || '', name_en: product.name_en || '', name_fr: product.name_fr || '',
+      description_ar: product.description_ar || '', description_en: product.description_en || '', description_fr: product.description_fr || '',
       price: product.price, original_price: product.original_price || '',
       discount_percent: product.discount_percent || '', stock: product.stock,
       category_id: product.category_id || product.category?.id || '',
@@ -134,8 +136,8 @@ export default function ProductsPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface">
               <tr>
-                {[isAr?'المنتج':'Product', isAr?'السعر':'Price', isAr?'المخزون':'Stock',
-                  isAr?'القسم':'Category', isAr?'الحالة':'Status', isAr?'إجراء':'Actions'].map(h => (
+                {[isAr ? 'المنتج' : 'Product', isAr ? 'السعر' : 'Price', isAr ? 'المخزون' : 'Stock',
+                isAr ? 'القسم' : 'Category', isAr ? 'الحالة' : 'Status', isAr ? 'إجراء' : 'Actions'].map(h => (
                   <th key={h} className="text-start px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
                     {h}
                   </th>
@@ -157,7 +159,7 @@ export default function ProductsPage() {
                         <img src={resolveImageUrl(p.images[0])} alt="" className="w-10 h-10 rounded-lg object-contain bg-gray-50 p-0.5" />
                       )}
                       <div>
-                        <p className="font-semibold text-dark line-clamp-1">{isAr ? p.name_ar : p.name_en}</p>
+                        <p className="font-semibold text-dark line-clamp-1">{getLocalized(p, 'name', language)}</p>
                         <p className="text-xs text-muted">{p.slug}</p>
                       </div>
                     </div>
@@ -173,7 +175,7 @@ export default function ProductsPage() {
                       {p.stock}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-muted text-xs">{p.category?.name_en || '—'}</td>
+                  <td className="px-4 py-3 text-muted text-xs">{getLocalized(p.category, 'name', language) || '—'}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                       {p.is_active ? (isAr ? 'نشط' : 'Active') : (isAr ? 'غير نشط' : 'Inactive')}
@@ -228,6 +230,7 @@ export default function ProductsPage() {
                 {[
                   { key: 'name_ar', label: isAr ? 'الاسم بالعربية' : 'Arabic Name' },
                   { key: 'name_en', label: isAr ? 'الاسم بالإنجليزية' : 'English Name' },
+                  { key: 'name_fr', label: isAr ? 'الاسم بالفرنسية' : 'French Name' },
                 ].map(({ key, label }) => (
                   <div key={key}>
                     <label className="block text-xs font-semibold text-muted mb-1">{label}</label>
@@ -238,12 +241,27 @@ export default function ProductsPage() {
                 ))}
               </div>
 
+              {/* Description fields */}
+              <div className="space-y-3">
+                {[
+                  { key: 'description_ar', label: isAr ? 'الوصف بالعربية' : 'Arabic Description' },
+                  { key: 'description_en', label: isAr ? 'الوصف بالإنجليزية' : 'English Description' },
+                  { key: 'description_fr', label: isAr ? 'الوصف بالفرنسية' : 'French Description' },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="block text-xs font-semibold text-muted mb-1">{label}</label>
+                    <textarea value={form[key]} onChange={e => setField(key, e.target.value)}
+                      className="input-field min-h-[80px]" />
+                  </div>
+                ))}
+              </div>
+
               {/* Price, Stock, Category */}
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { key: 'price',    label: isAr ? 'السعر $' : 'Price $',         type: 'number' },
+                  { key: 'price', label: isAr ? 'السعر $' : 'Price $', type: 'number' },
                   { key: 'original_price', label: isAr ? 'السعر الأصلي' : 'Original $', type: 'number' },
-                  { key: 'stock',    label: isAr ? 'المخزون' : 'Stock',           type: 'number' },
+                  { key: 'stock', label: isAr ? 'المخزون' : 'Stock', type: 'number' },
                 ].map(({ key, label, type }) => (
                   <div key={key}>
                     <label className="block text-xs font-semibold text-muted mb-1">{label}</label>
@@ -259,7 +277,7 @@ export default function ProductsPage() {
                 <select value={form.category_id} onChange={e => setField('category_id', e.target.value)} className="input-field">
                   <option value="">{isAr ? 'اختر قسم' : 'Select category'}</option>
                   {categories.map(c => (
-                    <option key={c.id} value={c.id}>{isAr ? c.name_ar : c.name_en}</option>
+                    <option key={c.id} value={c.id}>{getLocalized(c, 'name', language)}</option>
                   ))}
                 </select>
               </div>
@@ -267,7 +285,7 @@ export default function ProductsPage() {
               {/* Toggles */}
               <div className="flex items-center gap-6">
                 {[
-                  { key: 'is_active',   labelAr: 'نشط', labelEn: 'Active' },
+                  { key: 'is_active', labelAr: 'نشط', labelEn: 'Active' },
                   { key: 'is_featured', labelAr: 'مميز', labelEn: 'Featured' },
                 ].map(({ key, labelAr, labelEn }) => (
                   <label key={key} className="flex items-center gap-2 cursor-pointer">

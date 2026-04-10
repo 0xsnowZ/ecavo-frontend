@@ -12,7 +12,6 @@ import { useCartStore } from '../../../store/useCartStore';
 export default function Header({ onCartOpen }) {
   const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
 
   return (
     <>
@@ -30,7 +29,9 @@ export default function Header({ onCartOpen }) {
           <SearchBar />
 
           {/* Cart */}
-          <CartIcon onOpen={onCartOpen} />
+          <div className="ms-auto shrink-0">
+            <CartIcon onOpen={onCartOpen} />
+          </div>
         </div>
 
         {/* Bottom bar: Nav + Create Account */}

@@ -14,6 +14,7 @@ import Spinner from '../components/ui/Spinner';
 import CountdownTimer from '../components/ui/CountdownTimer';
 import ProductCard from '../components/product/ProductCard';
 import { resolveImages } from '../utils/imageUrl';
+import { getLocalized } from '../utils/localize';
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -54,8 +55,8 @@ export default function ProductDetail() {
 
   if (!product) return null;
 
-  const name        = isAr ? product.name_ar : product.name_en;
-  const description = isAr ? product.description_ar : product.description_en;
+  const name        = getLocalized(product, 'name', i18n.language);
+  const description = getLocalized(product, 'description', i18n.language);
   const basePrice   = parseFloat(product.price) + (selectedVariant ? parseFloat(selectedVariant.extra_price) : 0);
   const displayPrice = `${currency.symbol}${(basePrice * currency.rate).toFixed(2)}`;
   const displayOriginal = product.original_price
@@ -65,7 +66,7 @@ export default function ProductDetail() {
   const images = resolveImages(product.images, '/placeholder.jpg');
 
   const handleAddToCart = () => {
-    addItem({ id: product.id, slug, name, price: basePrice, images }, qty, selectedVariant);
+    addItem({ ...product, price: basePrice }, qty, selectedVariant);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
@@ -145,7 +146,7 @@ export default function ProductDetail() {
               to={`/categories/${product.category.slug}`}
               className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full inline-block"
             >
-              {isAr ? product.category.name_ar : product.category.name_en}
+              {getLocalized(product.category, 'name', i18n.language)}
             </Link>
           )}
 

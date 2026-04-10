@@ -11,6 +11,11 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
   }
 
   html[dir='rtl'] {
@@ -33,18 +38,22 @@
   ::-webkit-scrollbar {
     width: 6px;
   }
+
   ::-webkit-scrollbar-track {
     @apply bg-gray-100;
   }
+
   ::-webkit-scrollbar-thumb {
     @apply bg-gray-300 rounded-full;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-400;
   }
 }
 
 @layer components {
+
   /* Container */
   .container-main {
     @apply max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8;
@@ -52,30 +61,24 @@
 
   /* Buttons */
   .btn-primary {
-    @apply bg-primary hover:bg-primary-hover text-white font-semibold px-6 py-2.5 rounded-lg
-           transition-all duration-200 ease-smooth inline-flex items-center gap-2
-           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-primary hover:bg-primary-hover text-white font-semibold px-6 py-2.5 rounded-lg transition-all duration-200 ease-smooth inline-flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-secondary hover:bg-secondary-hover text-white font-semibold px-6 py-2.5 rounded-lg
-           transition-all duration-200 ease-smooth inline-flex items-center gap-2
-           active:scale-95;
+    @apply bg-secondary hover:bg-secondary-hover text-white font-semibold px-6 py-2.5 rounded-lg transition-all duration-200 ease-smooth inline-flex items-center gap-2 active:scale-95;
   }
 
   .btn-outline {
-    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold px-6 py-2.5 rounded-lg
-           transition-all duration-200 ease-smooth inline-flex items-center gap-2;
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold px-6 py-2.5 rounded-lg transition-all duration-200 ease-smooth inline-flex items-center gap-2;
   }
 
   .btn-ghost {
-    @apply text-muted hover:text-dark hover:bg-gray-100 font-medium px-4 py-2 rounded-lg
-           transition-all duration-200 ease-smooth inline-flex items-center gap-2;
+    @apply text-muted hover:text-dark hover:bg-gray-100 font-medium px-4 py-2 rounded-lg transition-all duration-200 ease-smooth inline-flex items-center gap-2;
   }
 
   /* Cards */
   .card {
-    @apply bg-white rounded-xl shadow-card hover:shadow-hover transition-shadow duration-300;
+    @apply bg-white rounded-lg shadow-card hover:shadow-hover transition-shadow duration-300;
   }
 
   /* Badge */
@@ -89,15 +92,14 @@
 
   /* Form inputs */
   .input-field {
-    @apply w-full border border-border rounded-lg px-4 py-2.5 text-sm
-           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
-           transition-colors duration-200 bg-white placeholder:text-gray-400;
+    @apply w-full border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors duration-200 bg-white placeholder:text-gray-400;
   }
 
   /* Section heading */
   .section-title {
     @apply text-2xl font-bold text-secondary relative pb-3 mb-6 inline-block;
   }
+
   .section-title::after {
     content: '';
     @apply absolute bottom-0 start-0 w-12 h-1 bg-primary rounded-full;
@@ -107,29 +109,31 @@
   .product-img-wrapper {
     @apply relative overflow-hidden;
   }
+
   .product-img-wrapper img.hover-img {
     @apply absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300;
   }
+
   .product-img-wrapper:hover img.hover-img {
     @apply opacity-100;
   }
+
   .product-img-wrapper:hover img.primary-img {
     @apply opacity-0;
   }
 
   /* Glass effect hover overlay */
   .glass-hover {
-    @apply absolute inset-0 bg-white/10 backdrop-blur-[1px] opacity-0 hover:opacity-100
-           transition-opacity duration-300;
+    @apply absolute inset-0 bg-white/10 backdrop-blur-[1px] opacity-0 hover:opacity-100 transition-opacity duration-300;
   }
 
   /* Admin sidebar link */
   .admin-nav-link {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium
-           text-gray-600 hover:bg-primary/10 hover:text-primary transition-all duration-200;
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-primary/10 hover:text-primary dark:hover:bg-gray-800 dark:hover:text-white transition-all duration-200;
   }
+
   .admin-nav-link.active {
-    @apply bg-primary/10 text-primary;
+    @apply bg-primary text-white;
   }
 
   /* Status badges */
@@ -147,6 +151,7 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
+
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -155,4 +160,50 @@
   html[dir='rtl'] .rtl-flip {
     transform: scaleX(-1);
   }
+
+  /* Animate fade in */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
+
+/* ── Swiper overrides: fix arrows "popping out" over hero ─────────────────── */
+
+/* Scope to home carousels only — hero slides are untouched */
+.swiper-container-home {
+  position: relative;
+  overflow: visible;
+  /* allow slight arrow bleed within section */
+}
+
+.swiper-container-home .swiper-button-prev,
+.swiper-container-home .swiper-button-next {
+  width: 34px;
+  height: 34px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  color: #E63946;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-top: 0;
+  z-index: 10;
+}
+
+.swiper-container-home .swiper-button-prev::after,
+.swiper-container-home .swiper-button-next::after {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.swiper-container-home .swiper-button-disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Hero slider: completely isolate from product carousel arrows */
+.hero-slider-wrapper {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
 }

@@ -6,25 +6,27 @@ import { useWishlistStore } from '../../store/useWishlistStore';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { useTranslation } from 'react-i18next';
 import CountdownTimer from '../ui/CountdownTimer';
+import { getLocalized } from '../../utils/localize';
 
 export default function ProductCard({ product, showCountdown = false }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { currency } = useLocaleStore();
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, isInWishlist } = useWishlistStore();
 
-  const {
-    id,
-    slug,
-    name,
-    price,
-    originalPrice,
-    discountPercent,
-    images,
-    rating = 4.5,
-    reviewCount = 0,
-    dealEndsAt,
-  } = product;
+  // Pages normalize API data to camelCase; raw API uses snake_case — support both
+  const id               = product.id;
+  const slug             = product.slug;
+  const price            = product.price;
+  const images           = product.images;
+  const originalPrice    = product.originalPrice    ?? product.original_price    ?? null;
+  const discountPercent  = product.discountPercent  ?? product.discount_percent  ?? null;
+  const avgRating        = product.rating           ?? product.avg_rating        ?? 0;
+  const reviewCount      = product.reviewCount      ?? product.review_count      ?? 0;
+  const dealEndsAt       = product.dealEndsAt       ?? product.deal_ends_at      ?? null;
+
+  const name = getLocalized(product, 'name', i18n.language);
+  const description = getLocalized(product, 'description', i18n.language);
 
   const displayPrice = `${currency.symbol}${(price * currency.rate).toFixed(2)}`;
   const displayOriginal = originalPrice
@@ -85,7 +87,13 @@ export default function ProductCard({ product, showCountdown = false }) {
           {name}
         </Link>
 
-        <StarRating rating={rating} count={reviewCount} />
+        {description && (
+          <p className="text-xs text-muted line-clamp-2 leading-relaxed">
+            {description.replace(/[#*\n]/g, ' ').trim()}
+          </p>
+        )}
+
+        <StarRating rating={avgRating} count={reviewCount} />
 
         <div className="flex items-center gap-2 mt-auto">
           <span className="text-lg font-bold text-primary">{displayPrice}</span>

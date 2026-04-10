@@ -1,3 +1,4 @@
+import { useLocaleStore } from '../../../store/useLocaleStore';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -10,27 +11,27 @@ import { adminService } from '../../../services';
 import Spinner from '../../../components/ui/Spinner';
 
 const STATUS_CONFIG = {
-  placed:            { labelAr: 'تم الطلب',       labelEn: 'Placed',          color: 'bg-blue-100 text-blue-700',    icon: ShoppingCart },
-  preparing:         { labelAr: 'يتم التجهيز',     labelEn: 'Preparing',       color: 'bg-indigo-100 text-indigo-700',icon: Package },
-  awaiting_shipment: { labelAr: 'انتظار الشحن',    labelEn: 'Awaiting Ship',   color: 'bg-yellow-100 text-yellow-700',icon: Package },
-  shipped:           { labelAr: 'تم الشحن',         labelEn: 'Shipped',         color: 'bg-teal-100 text-teal-700',    icon: Truck },
-  in_transit:        { labelAr: 'في الطريق',        labelEn: 'In Transit',      color: 'bg-purple-100 text-purple-700',icon: TrendingUp },
-  delivered:         { labelAr: 'تم الاستلام',      labelEn: 'Delivered',       color: 'bg-green-100 text-green-700',  icon: CheckCircle2 },
-  no_answer:         { labelAr: 'لا يرد',           labelEn: 'No Answer',       color: 'bg-orange-100 text-orange-700',icon: PhoneOff },
-  postponed:         { labelAr: 'تم التأجيل',       labelEn: 'Postponed',       color: 'bg-gray-100 text-gray-600',    icon: Clock },
-  wrong_address:     { labelAr: 'عنوان خاطئ',       labelEn: 'Wrong Address',   color: 'bg-red-100 text-red-500',      icon: MapPin },
-  cancelled:         { labelAr: 'تم الإلغاء',       labelEn: 'Cancelled',       color: 'bg-red-100 text-red-600',      icon: XCircle },
-  returned:          { labelAr: 'تم الإرجاع',       labelEn: 'Returned',        color: 'bg-pink-100 text-pink-700',    icon: RotateCcw },
+  placed: { labelAr: 'تم الطلب', labelEn: 'Placed', color: 'bg-blue-100 text-blue-700', icon: ShoppingCart },
+  preparing: { labelAr: 'يتم التجهيز', labelEn: 'Preparing', color: 'bg-indigo-100 text-indigo-700', icon: Package },
+  awaiting_shipment: { labelAr: 'انتظار الشحن', labelEn: 'Awaiting Ship', color: 'bg-yellow-100 text-yellow-700', icon: Package },
+  shipped: { labelAr: 'تم الشحن', labelEn: 'Shipped', color: 'bg-teal-100 text-teal-700', icon: Truck },
+  in_transit: { labelAr: 'في الطريق', labelEn: 'In Transit', color: 'bg-purple-100 text-purple-700', icon: TrendingUp },
+  delivered: { labelAr: 'تم الاستلام', labelEn: 'Delivered', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
+  no_answer: { labelAr: 'لا يرد', labelEn: 'No Answer', color: 'bg-orange-100 text-orange-700', icon: PhoneOff },
+  postponed: { labelAr: 'تم التأجيل', labelEn: 'Postponed', color: 'bg-gray-100 text-gray-600', icon: Clock },
+  wrong_address: { labelAr: 'عنوان خاطئ', labelEn: 'Wrong Address', color: 'bg-red-100 text-red-500', icon: MapPin },
+  cancelled: { labelAr: 'تم الإلغاء', labelEn: 'Cancelled', color: 'bg-red-100 text-red-600', icon: XCircle },
+  returned: { labelAr: 'تم الإرجاع', labelEn: 'Returned', color: 'bg-pink-100 text-pink-700', icon: RotateCcw },
 };
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const { language } = useLocaleStore(); const isAr = language === 'ar';
 
-  const [stats, setStats]           = useState(null);
-  const [recentOrders, setRecent]   = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [activeStatus, setActive]   = useState(null);
+  const [stats, setStats] = useState(null);
+  const [recentOrders, setRecent] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeStatus, setActive] = useState(null);
 
   useEffect(() => {
     adminService.stats()
@@ -38,14 +39,14 @@ export default function DashboardPage() {
         setStats(r.data.stats);
         setRecent(r.data.recent_orders || []);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>;
 
   const byStatus = stats?.by_status || {};
-  const total    = stats?.total_orders || 0;
+  const total = stats?.total_orders || 0;
 
   return (
     <div className="space-y-6">
@@ -61,10 +62,10 @@ export default function DashboardPage() {
       {/* Top KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: ShoppingCart, labelAr: 'إجمالي الطلبات',  labelEn: 'Total Orders',    value: total,                        color: 'text-primary',   bg: 'bg-primary/10' },
-          { icon: DollarSign,   labelAr: 'الإيرادات',        labelEn: 'Revenue',         value: `$${parseFloat(stats?.total_revenue || 0).toFixed(0)}`, color: 'text-green-600', bg: 'bg-green-100' },
-          { icon: Package,      labelAr: 'المنتجات',          labelEn: 'Products',        value: stats?.total_products || 0,   color: 'text-blue-600',  bg: 'bg-blue-100' },
-          { icon: Users,        labelAr: 'العملاء',           labelEn: 'Customers',       value: stats?.total_customers || 0,  color: 'text-purple-600',bg: 'bg-purple-100' },
+          { icon: ShoppingCart, labelAr: 'إجمالي الطلبات', labelEn: 'Total Orders', value: total, color: 'text-primary', bg: 'bg-primary/10' },
+          { icon: DollarSign, labelAr: 'الإيرادات', labelEn: 'Revenue', value: `$${parseFloat(stats?.total_revenue || 0).toFixed(0)}`, color: 'text-green-600', bg: 'bg-green-100' },
+          { icon: Package, labelAr: 'المنتجات', labelEn: 'Products', value: stats?.total_products || 0, color: 'text-blue-600', bg: 'bg-blue-100' },
+          { icon: Users, labelAr: 'العملاء', labelEn: 'Customers', value: stats?.total_customers || 0, color: 'text-purple-600', bg: 'bg-purple-100' },
         ].map(({ icon: Icon, labelAr, labelEn, value, color, bg }) => (
           <div key={labelEn} className="card p-5">
             <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mb-3`}>
@@ -83,7 +84,7 @@ export default function DashboardPage() {
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
           {Object.entries(STATUS_CONFIG).map(([status, cfg]) => {
-            const Icon  = cfg.icon;
+            const Icon = cfg.icon;
             const count = byStatus[status] || 0;
             const isActive = activeStatus === status;
             return (
@@ -122,10 +123,10 @@ export default function DashboardPage() {
                 {['#', isAr ? 'العميل' : 'Customer', isAr ? 'الهاتف' : 'Phone',
                   isAr ? 'المنتجات' : 'Items', isAr ? 'الإجمالي' : 'Total',
                   isAr ? 'الحالة' : 'Status', isAr ? 'التاريخ' : 'Date'].map(h => (
-                  <th key={h} className="text-start text-xs font-semibold text-muted uppercase tracking-wider px-4 py-3">
-                    {h}
-                  </th>
-                ))}
+                    <th key={h} className="text-start text-xs font-semibold text-muted uppercase tracking-wider px-4 py-3">
+                      {h}
+                    </th>
+                  ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

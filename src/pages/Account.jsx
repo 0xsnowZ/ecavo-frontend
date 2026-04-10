@@ -25,16 +25,8 @@ const STATUS_COLOR = {
   returned:          'bg-pink-100 text-pink-700',
 };
 
-const STATUS_LABEL_AR = {
-  placed: 'تم الطلب', preparing: 'يتم التجهيز', awaiting_shipment: 'انتظار الشحن',
-  shipped: 'تم الشحن', in_transit: 'في الطريق', delivered: 'تم الاستلام',
-  no_answer: 'لا يرد', postponed: 'تم التأجيل', wrong_address: 'عنوان خاطئ',
-  cancelled: 'تم الإلغاء', returned: 'تم الإرجاع',
-};
-
 export default function Account() {
-  const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, updateUser, logout } = useAuthStore();
   const { currency } = useLocaleStore();
@@ -75,13 +67,13 @@ export default function Account() {
   };
 
   const TABS = [
-    { id: 'orders',  labelAr: 'طلباتي',    labelEn: 'My Orders' },
-    { id: 'profile', labelAr: 'ملف الحساب', labelEn: 'Profile' },
+    { id: 'orders',  key: 'tab_orders' },
+    { id: 'profile', key: 'tab_profile' },
   ];
 
   return (
     <div className="container-main py-8">
-      <h1 className="text-2xl font-bold text-secondary mb-6">{isAr ? 'حسابي' : 'My Account'}</h1>
+      <h1 className="text-2xl font-bold text-secondary mb-6">{t('account_page.title')}</h1>
 
       <div className="flex flex-col lg:flex-row gap-6">
 
@@ -96,21 +88,21 @@ export default function Account() {
               <p className="font-bold text-dark">{user?.name}</p>
               <p className="text-xs text-muted">{user?.email}</p>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${user?.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600'}`}>
-                {user?.role === 'admin' ? (isAr ? 'مشرف' : 'Admin') : (isAr ? 'عميل' : 'Customer')}
+                {user?.role === 'admin' ? t('account_page.role_admin') : t('account_page.role_customer')}
               </span>
             </div>
 
             {/* Nav tabs */}
             <nav className="space-y-1">
-              {TABS.map(t => (
+              {TABS.map(tabItem => (
                 <button
-                  key={t.id}
-                  onClick={() => setTab(t.id)}
+                  key={tabItem.id}
+                  onClick={() => setTab(tabItem.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-start
-                    ${tab === t.id ? 'bg-primary/10 text-primary' : 'text-dark hover:bg-gray-100'}`}
+                    ${tab === tabItem.id ? 'bg-primary/10 text-primary' : 'text-dark hover:bg-gray-100'}`}
                 >
-                  {t.id === 'orders' ? <Package size={16} /> : <User size={16} />}
-                  {isAr ? t.labelAr : t.labelEn}
+                  {tabItem.id === 'orders' ? <Package size={16} /> : <User size={16} />}
+                  {t(`account_page.${tabItem.key}`)}
                 </button>
               ))}
               {user?.role === 'admin' && (
@@ -119,7 +111,7 @@ export default function Account() {
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-dark hover:bg-gray-100 transition-all"
                 >
                   <ShieldCheck size={16} />
-                  {isAr ? 'لوحة التحكم' : 'Admin Panel'}
+                  {t('account_page.admin_panel')}
                 </Link>
               )}
               <button
@@ -127,7 +119,7 @@ export default function Account() {
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
               >
                 <LogOut size={16} />
-                {isAr ? 'تسجيل الخروج' : 'Logout'}
+                {t('account_page.logout')}
               </button>
             </nav>
           </div>
@@ -140,8 +132,8 @@ export default function Account() {
           {tab === 'orders' && (
             <div className="card overflow-hidden">
               <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                <h2 className="font-bold text-secondary">{isAr ? 'سجل الطلبات' : 'Order History'}</h2>
-                <span className="text-xs text-muted">{orders.length} {isAr ? 'طلب' : 'orders'}</span>
+                <h2 className="font-bold text-secondary">{t('account_page.order_history')}</h2>
+                <span className="text-xs text-muted">{orders.length} {orders.length === 1 ? t('account_page.order') : t('account_page.orders')}</span>
               </div>
 
               {ordersLoading ? (
@@ -149,8 +141,8 @@ export default function Account() {
               ) : orders.length === 0 ? (
                 <div className="text-center py-16">
                   <Package size={48} className="text-gray-200 mx-auto mb-3" />
-                  <p className="text-muted text-sm">{isAr ? 'لا توجد طلبات بعد' : 'No orders yet'}</p>
-                  <Link to="/products" className="btn-primary mt-4 text-sm">{isAr ? 'تسوق الآن' : 'Shop Now'}</Link>
+                  <p className="text-muted text-sm">{t('account_page.no_orders')}</p>
+                  <Link to="/products" className="btn-primary mt-4 text-sm">{t('account_page.shop_now')}</Link>
                 </div>
               ) : (
                 <div className="divide-y divide-border">
@@ -159,15 +151,15 @@ export default function Account() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
                           <p className="font-semibold text-dark text-sm">
-                            {isAr ? `طلب #${order.id}` : `Order #${order.id}`}
+                            {t('account_page.order_id', { id: order.id })}
                           </p>
                           <p className="text-xs text-muted">{order.created_at}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${STATUS_COLOR[order.status] || 'bg-gray-100 text-gray-600'}`}>
-                              {isAr ? (STATUS_LABEL_AR[order.status] || order.status) : order.status.replace(/_/g, ' ')}
+                              {t(`orders.status_${order.status}`, { defaultValue: order.status.replace(/_/g, ' ') })}
                             </span>
                             <span className="text-xs text-muted">
-                              {order.items?.length} {isAr ? 'منتج' : 'item(s)'}
+                              {order.items?.length} {t('account_page.items_count')}
                             </span>
                           </div>
                         </div>
@@ -177,7 +169,7 @@ export default function Account() {
                             to={`/orders/${order.id}/track`}
                             className="text-xs text-primary hover:underline flex items-center gap-1"
                           >
-                            {isAr ? 'تتبع' : 'Track'}
+                            {t('account_page.track')}
                             <ChevronRight size={12} className="rtl-flip" />
                           </Link>
                         </div>
@@ -214,11 +206,11 @@ export default function Account() {
           {tab === 'profile' && (
             <div className="card p-6 space-y-5">
               <div className="flex items-center justify-between">
-                <h2 className="font-bold text-secondary">{isAr ? 'ملف الحساب' : 'Profile Information'}</h2>
+                <h2 className="font-bold text-secondary">{t('account_page.profile_info')}</h2>
                 {!editMode && (
                   <button onClick={() => setEditMode(true)} className="btn-ghost text-sm py-1.5 px-3">
                     <Edit2 size={15} />
-                    {isAr ? 'تعديل' : 'Edit'}
+                    {t('account_page.edit')}
                   </button>
                 )}
               </div>
@@ -226,7 +218,7 @@ export default function Account() {
               {saveOk && (
                 <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-4 py-2.5 animate-fade-in">
                   <CheckCircle2 size={16} />
-                  {isAr ? 'تم حفظ التغييرات' : 'Changes saved successfully'}
+                  {t('account_page.saved_success')}
                 </div>
               )}
 
@@ -234,7 +226,7 @@ export default function Account() {
                 {/* Name */}
                 <div>
                   <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
-                    {isAr ? 'الاسم الكامل' : 'Full Name'}
+                    {t('account_page.full_name')}
                   </label>
                   {editMode ? (
                     <input
@@ -254,19 +246,19 @@ export default function Account() {
                 {/* Email (read only) */}
                 <div>
                   <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
-                    {isAr ? 'البريد الإلكتروني' : 'Email'}
+                    {t('account_page.email')}
                   </label>
                   <div className="flex items-center gap-2 py-2.5 px-3 bg-surface rounded-lg text-sm opacity-75">
                     <Mail size={16} className="text-muted" />
                     <span className="text-dark">{user?.email}</span>
-                    <span className="ms-auto text-xs text-muted">{isAr ? 'لا يمكن تغييره' : 'Cannot change'}</span>
+                    <span className="ms-auto text-xs text-muted">{t('account_page.cannot_change')}</span>
                   </div>
                 </div>
 
                 {/* Phone */}
                 <div>
                   <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
-                    {isAr ? 'رقم الهاتف' : 'Phone'}
+                    {t('account_page.phone')}
                   </label>
                   {editMode ? (
                     <input
@@ -279,7 +271,7 @@ export default function Account() {
                   ) : (
                     <div className="flex items-center gap-2 py-2.5 px-3 bg-surface rounded-lg text-sm">
                       <Phone size={16} className="text-muted" />
-                      <span className="text-dark">{user?.phone || (isAr ? 'غير مضاف' : 'Not set')}</span>
+                      <span className="text-dark">{user?.phone || t('account_page.not_set')}</span>
                     </div>
                   )}
                 </div>
@@ -288,11 +280,11 @@ export default function Account() {
               {editMode && (
                 <div className="flex gap-3 pt-2">
                   <button onClick={handleSaveProfile} disabled={saving} className="btn-primary">
-                    {saving ? <Loader2 size={16} className="animate-spin" /> : (isAr ? 'حفظ' : 'Save')}
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : t('account_page.save')}
                   </button>
                   <button onClick={() => { setEditMode(false); setProfileForm({ name: user?.name, phone: user?.phone }); }}
                     className="btn-ghost">
-                    {isAr ? 'إلغاء' : 'Cancel'}
+                    {t('account_page.cancel')}
                   </button>
                 </div>
               )}

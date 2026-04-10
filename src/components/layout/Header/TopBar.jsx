@@ -1,15 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { useLocaleStore } from '../../../store/useLocaleStore';
+import { useLocaleStore, CURRENCIES, LANGUAGES } from '../../../store/useLocaleStore';
 import { useAuthStore } from '../../../store/useAuthStore';
-import i18n from '../../../i18n';
-
-const CURRENCIES = [
-  { code: 'USD', symbol: '$', rate: 1, country: 'US', label: 'USA' },
-  { code: 'EGP', symbol: 'ج', rate: 47, country: 'EG', label: 'Egypt' },
-  { code: 'GBP', symbol: '£', rate: 0.79, country: 'UK', label: 'UK' },
-  { code: 'AED', symbol: 'د.إ', rate: 3.67, country: 'AE', label: 'UAE' },
-];
 
 export default function TopBar() {
   const { t } = useTranslation();
@@ -17,14 +9,11 @@ export default function TopBar() {
   const { isAuthenticated, user } = useAuthStore();
 
   const handleLang = (e) => {
-    const lang = e.target.value;
-    setLanguage(lang);
-    i18n.changeLanguage(lang);
+    setLanguage(e.target.value);
   };
 
   const handleCurrency = (e) => {
-    const cur = CURRENCIES.find((c) => c.country === e.target.value);
-    if (cur) setCurrency(cur);
+    setCurrency(e.target.value);
   };
 
   return (
@@ -37,14 +26,14 @@ export default function TopBar() {
         <div className="flex items-center gap-3 ms-auto">
           {/* Currency selector */}
           <select
-            value={currency.country}
+            value={currency.code}
             onChange={handleCurrency}
             className="bg-white/10 border border-white/20 text-white text-xs rounded-md px-2 py-1 
                        focus:outline-none cursor-pointer hover:bg-white/20 transition-colors"
           >
             {CURRENCIES.map((c) => (
-              <option key={c.code} value={c.country} className="text-dark bg-white">
-                {c.label} ({c.symbol})
+              <option key={c.code} value={c.code} className="text-dark bg-white">
+                {c.flag} {c.code} ({c.symbol})
               </option>
             ))}
           </select>
@@ -56,26 +45,27 @@ export default function TopBar() {
             className="bg-white/10 border border-white/20 text-white text-xs rounded-md px-2 py-1
                        focus:outline-none cursor-pointer hover:bg-white/20 transition-colors"
           >
-            <option value="ar" className="text-dark bg-white">العربية</option>
-            <option value="en" className="text-dark bg-white">English</option>
+            {LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code} className="text-dark bg-white">
+                {l.flag} {l.label}
+              </option>
+            ))}
           </select>
 
           <div className="w-px h-3 bg-white/30" />
 
           {/* Account links */}
+          <Link to="/wishlist" className="opacity-80 hover:opacity-100 transition-opacity">
+            {t('header.my_wishlist')}
+          </Link>
           {isAuthenticated ? (
             <Link to="/account" className="opacity-80 hover:opacity-100 transition-opacity">
               {user?.name}
             </Link>
           ) : (
-            <>
-              <Link to="/login" className="opacity-80 hover:opacity-100 transition-opacity">
-                {t('header.sign_in')}
-              </Link>
-              <Link to="/wishlist" className="opacity-80 hover:opacity-100 transition-opacity">
-                {t('header.my_wishlist')}
-              </Link>
-            </>
+            <Link to="/login" className="opacity-80 hover:opacity-100 transition-opacity">
+              {t('header.sign_in')}
+            </Link>
           )}
         </div>
       </div>
