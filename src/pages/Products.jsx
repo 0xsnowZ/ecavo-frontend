@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal, Grid2X2, List, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { productsService, categoriesService } from '../services';
 import ProductCard from '../components/product/ProductCard';
-import Spinner from '../components/ui/Spinner';
-import SectionTitle from '../components/common/SectionTitle';
+import Skeleton from '../components/ui/Skeleton';
+import SEO from '../components/common/SEO';
 
 const SORT_OPTIONS = [
   { value: 'latest',     labelAr: 'الأحدث',        labelEn: 'Latest' },
@@ -125,7 +125,15 @@ export default function Products() {
   );
 
   return (
-    <div className="container-main py-8">
+    <>
+      <SEO
+        titleAr={search ? `نتائج: "${search}"` : (category ? category : 'كل المنتجات')}
+        titleEn={search ? `Results: "${search}"` : (category ? category : 'All Products')}
+        descriptionAr="تصفح أفضل المنتجات بأسعار مميزة مع إيكافو."
+        descriptionEn="Browse top products at great prices with ECAVO."
+        lang={isAr ? 'ar' : 'en'}
+      />
+      <div className="container-main py-8">
       <div className="flex flex-col lg:flex-row gap-6">
 
         {/* ── Sidebar Filters (desktop) ── */}
@@ -197,8 +205,8 @@ export default function Products() {
 
           {/* Products grid */}
           {loading ? (
-            <div className="flex justify-center py-24">
-              <Spinner size="lg" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }, (_, i) => <Skeleton.Card key={i} />)}
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-24">
@@ -279,6 +287,7 @@ export default function Products() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

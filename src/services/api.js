@@ -2,8 +2,12 @@ import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
-  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8001/api',
+  withCredentials: false, // Bearer token only — no cookies/CSRF
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
 });
 
 // Request interceptor — attach auth token

@@ -43,6 +43,7 @@ export default {
         'slide-down': 'slideDown 0.25s ease-out',
         'slide-up': 'slideUp 0.25s ease-out',
         'pulse-soft': 'pulseSoft 2s infinite',
+        'shimmer': 'shimmer 1.5s infinite',
       },
       keyframes: {
         fadeIn: {
@@ -60,6 +61,9 @@ export default {
         pulseSoft: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.7' },
+        },
+        shimmer: {
+          '100%': { transform: 'translateX(200%)' },
         },
       },
     },
