@@ -1,38 +1,161 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShoppingCart, CheckCircle, Package, Truck, MapPin, PhoneOff, Clock, AlertCircle, XCircle, RotateCcw, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import {
+  ShoppingCart, CheckCircle2, Package, Truck, MapPin,
+  PhoneOff, Clock, XCircle, RotateCcw, TrendingUp,
+  DollarSign, Users, ChevronRight,
+} from 'lucide-react';
+import { adminService } from '../../../services';
+import Spinner from '../../../components/ui/Spinner';
 
-const STATS = [
-  { icon: ShoppingCart, labelKey: 'admin.all_orders', count: 480, color: 'bg-primary/10 text-primary', active: true },
-  { icon: CheckCircle, labelKey: 'orders.status_placed', count: 180, color: 'bg-green-100 text-green-600' },
-  { icon: Package, labelKey: 'orders.status_preparing', count: 64, color: 'bg-blue-100 text-blue-600' },
-  { icon: Truck, labelKey: 'orders.status_awaiting_ship', count: 38, color: 'bg-yellow-100 text-yellow-600' },
-  { icon: TrendingUp, labelKey: 'orders.status_shipped', count: 90, color: 'bg-purple-100 text-purple-600' },
-  { icon: Truck, labelKey: 'orders.status_in_transit', count: 45, color: 'bg-indigo-100 text-indigo-600' },
-  { icon: CheckCircle, labelKey: 'orders.status_delivered', count: 220, color: 'bg-emerald-100 text-emerald-600' },
-  { icon: PhoneOff, labelKey: 'orders.status_no_answer', count: 12, color: 'bg-orange-100 text-orange-600' },
-  { icon: Clock, labelKey: 'orders.status_postponed', count: 8, color: 'bg-gray-100 text-gray-600' },
-  { icon: MapPin, labelKey: 'orders.status_wrong_address', count: 5, color: 'bg-red-100 text-red-500' },
-];
+const STATUS_CONFIG = {
+  placed:            { labelAr: 'تم الطلب',       labelEn: 'Placed',          color: 'bg-blue-100 text-blue-700',    icon: ShoppingCart },
+  preparing:         { labelAr: 'يتم التجهيز',     labelEn: 'Preparing',       color: 'bg-indigo-100 text-indigo-700',icon: Package },
+  awaiting_shipment: { labelAr: 'انتظار الشحن',    labelEn: 'Awaiting Ship',   color: 'bg-yellow-100 text-yellow-700',icon: Package },
+  shipped:           { labelAr: 'تم الشحن',         labelEn: 'Shipped',         color: 'bg-teal-100 text-teal-700',    icon: Truck },
+  in_transit:        { labelAr: 'في الطريق',        labelEn: 'In Transit',      color: 'bg-purple-100 text-purple-700',icon: TrendingUp },
+  delivered:         { labelAr: 'تم الاستلام',      labelEn: 'Delivered',       color: 'bg-green-100 text-green-700',  icon: CheckCircle2 },
+  no_answer:         { labelAr: 'لا يرد',           labelEn: 'No Answer',       color: 'bg-orange-100 text-orange-700',icon: PhoneOff },
+  postponed:         { labelAr: 'تم التأجيل',       labelEn: 'Postponed',       color: 'bg-gray-100 text-gray-600',    icon: Clock },
+  wrong_address:     { labelAr: 'عنوان خاطئ',       labelEn: 'Wrong Address',   color: 'bg-red-100 text-red-500',      icon: MapPin },
+  cancelled:         { labelAr: 'تم الإلغاء',       labelEn: 'Cancelled',       color: 'bg-red-100 text-red-600',      icon: XCircle },
+  returned:          { labelAr: 'تم الإرجاع',       labelEn: 'Returned',        color: 'bg-pink-100 text-pink-700',    icon: RotateCcw },
+};
 
 export default function DashboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+
+  const [stats, setStats]           = useState(null);
+  const [recentOrders, setRecent]   = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [activeStatus, setActive]   = useState(null);
+
+  useEffect(() => {
+    adminService.stats()
+      .then(r => {
+        setStats(r.data.stats);
+        setRecent(r.data.recent_orders || []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>;
+
+  const byStatus = stats?.by_status || {};
+  const total    = stats?.total_orders || 0;
+
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold text-secondary">{t('admin.dashboard')}</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {STATS.map(({ icon: Icon, labelKey, count, color, active }) => (
-          <div key={labelKey} className={`card p-4 cursor-pointer hover:shadow-hover transition-shadow ${active ? 'ring-2 ring-primary' : ''}`}>
-            <div className={`inline-flex p-2 rounded-lg ${color} mb-3`}>
-              <Icon size={20} />
+      {/* Page title */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-black text-secondary">{t('admin.dashboard')}</h1>
+        <Link to="/admin/orders" className="btn-primary text-sm py-2">
+          {t('admin.all_orders')}
+          <ChevronRight size={16} className="rtl-flip" />
+        </Link>
+      </div>
+
+      {/* Top KPI cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { icon: ShoppingCart, labelAr: 'إجمالي الطلبات',  labelEn: 'Total Orders',    value: total,                        color: 'text-primary',   bg: 'bg-primary/10' },
+          { icon: DollarSign,   labelAr: 'الإيرادات',        labelEn: 'Revenue',         value: `$${parseFloat(stats?.total_revenue || 0).toFixed(0)}`, color: 'text-green-600', bg: 'bg-green-100' },
+          { icon: Package,      labelAr: 'المنتجات',          labelEn: 'Products',        value: stats?.total_products || 0,   color: 'text-blue-600',  bg: 'bg-blue-100' },
+          { icon: Users,        labelAr: 'العملاء',           labelEn: 'Customers',       value: stats?.total_customers || 0,  color: 'text-purple-600',bg: 'bg-purple-100' },
+        ].map(({ icon: Icon, labelAr, labelEn, value, color, bg }) => (
+          <div key={labelEn} className="card p-5">
+            <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mb-3`}>
+              <Icon size={20} className={color} />
             </div>
-            <p className="text-2xl font-black text-dark">{count}</p>
-            <p className="text-xs text-muted mt-0.5">{t(labelKey)}</p>
+            <p className="text-2xl font-black text-dark">{value}</p>
+            <p className="text-xs text-muted mt-0.5">{isAr ? labelAr : labelEn}</p>
           </div>
         ))}
       </div>
-      <div className="card p-6">
-        <h3 className="font-bold text-secondary mb-4">Recent Orders</h3>
-        <p className="text-muted text-sm">Full orders table with search, filters, edit & detail modals — Sprint 4</p>
+
+      {/* Status cards grid */}
+      <div>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted mb-3">
+          {isAr ? 'حالة الطلبات' : 'Orders by Status'}
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          {Object.entries(STATUS_CONFIG).map(([status, cfg]) => {
+            const Icon  = cfg.icon;
+            const count = byStatus[status] || 0;
+            const isActive = activeStatus === status;
+            return (
+              <button
+                key={status}
+                onClick={() => setActive(s => s === status ? null : status)}
+                className={`card p-4 text-start cursor-pointer transition-all hover:shadow-hover
+                  ${isActive ? 'ring-2 ring-primary' : ''}`}
+              >
+                <div className={`inline-flex p-2 rounded-lg ${cfg.color} mb-2`}>
+                  <Icon size={16} />
+                </div>
+                <p className="text-xl font-black text-dark">{count}</p>
+                <p className="text-[11px] text-muted leading-tight mt-0.5">
+                  {isAr ? cfg.labelAr : cfg.labelEn}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Recent orders table */}
+      <div className="card overflow-hidden">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+          <h2 className="font-bold text-secondary">{isAr ? 'آخر الطلبات' : 'Recent Orders'}</h2>
+          <Link to="/admin/orders" className="text-xs text-primary hover:underline flex items-center gap-1">
+            {isAr ? 'عرض الكل' : 'View All'} <ChevronRight size={12} className="rtl-flip" />
+          </Link>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-surface">
+              <tr>
+                {['#', isAr ? 'العميل' : 'Customer', isAr ? 'الهاتف' : 'Phone',
+                  isAr ? 'المنتجات' : 'Items', isAr ? 'الإجمالي' : 'Total',
+                  isAr ? 'الحالة' : 'Status', isAr ? 'التاريخ' : 'Date'].map(h => (
+                  <th key={h} className="text-start text-xs font-semibold text-muted uppercase tracking-wider px-4 py-3">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {recentOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-muted text-sm">
+                    {isAr ? 'لا توجد طلبات بعد' : 'No orders yet'}
+                  </td>
+                </tr>
+              ) : recentOrders.map(order => {
+                const cfg = STATUS_CONFIG[order.status];
+                return (
+                  <tr key={order.id} className="hover:bg-surface transition-colors">
+                    <td className="px-4 py-3 font-bold text-dark">#{order.id}</td>
+                    <td className="px-4 py-3 text-dark">{order.guest_name || '—'}</td>
+                    <td className="px-4 py-3 text-muted">{order.guest_phone || '—'}</td>
+                    <td className="px-4 py-3 text-muted">{order.items_count}</td>
+                    <td className="px-4 py-3 font-bold text-primary">${parseFloat(order.total).toFixed(2)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg?.color || 'bg-gray-100 text-gray-600'}`}>
+                        {isAr ? cfg?.labelAr : cfg?.labelEn}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-muted text-xs">{order.created_at?.split(' ')[0]}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
