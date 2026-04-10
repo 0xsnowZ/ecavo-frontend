@@ -40,6 +40,17 @@ export const wishlistService = {
 
 export const adminService = {
   stats: () => api.get('/admin/dashboard/stats'),
+
+  uploadImage: (file) => {
+    const form = new FormData();
+    form.append('image', file);
+    return api.post('/admin/upload/image', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
+  deleteImage: (path) => api.delete('/admin/upload/image', { data: { path } }),
+
   orders: {
     list: (params) => api.get('/admin/orders', { params }),
     updateStatus: (id, status) => api.patch(`/admin/orders/${id}/status`, { status }),

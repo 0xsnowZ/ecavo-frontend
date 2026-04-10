@@ -13,6 +13,7 @@ import StarRating from '../components/ui/StarRating';
 import Spinner from '../components/ui/Spinner';
 import CountdownTimer from '../components/ui/CountdownTimer';
 import ProductCard from '../components/product/ProductCard';
+import { resolveImages } from '../utils/imageUrl';
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -61,7 +62,7 @@ export default function ProductDetail() {
     ? `${currency.symbol}${(parseFloat(product.original_price) * currency.rate).toFixed(2)}`
     : null;
   const wishlisted = isInWishlist(product.id);
-  const images = product.images?.length > 0 ? product.images : ['/placeholder.jpg'];
+  const images = resolveImages(product.images, '/placeholder.jpg');
 
   const handleAddToCart = () => {
     addItem({ id: product.id, slug, name, price: basePrice, images }, qty, selectedVariant);

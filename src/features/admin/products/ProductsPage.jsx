@@ -1,13 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Edit2, Trash2, X, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, X, Loader2, RefreshCw, Image } from 'lucide-react';
 import { adminService, categoriesService } from '../../../services';
 import Spinner from '../../../components/ui/Spinner';
+import ImageUploader from '../../../components/admin/ImageUploader';
+import { resolveImageUrl } from '../../../utils/imageUrl';
 
 const EMPTY_FORM = {
   name_ar: '', name_en: '', description_ar: '', description_en: '',
   price: '', original_price: '', discount_percent: '', stock: '',
   category_id: '', is_active: true, is_featured: false, deal_ends_at: '',
+  images: [],
 };
 
 export default function ProductsPage() {
@@ -60,6 +63,7 @@ export default function ProductsPage() {
       category_id: product.category_id || product.category?.id || '',
       is_active: product.is_active ?? true, is_featured: product.is_featured ?? false,
       deal_ends_at: product.deal_ends_at ? product.deal_ends_at.split('T')[0] : '',
+      images: product.images || [],
     });
     setErrors({});
     setEdit(product);
@@ -150,7 +154,7 @@ export default function ProductsPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {p.images?.[0] && (
-                        <img src={p.images[0]} alt="" className="w-10 h-10 rounded-lg object-contain bg-gray-50 p-0.5" />
+                        <img src={resolveImageUrl(p.images[0])} alt="" className="w-10 h-10 rounded-lg object-contain bg-gray-50 p-0.5" />
                       )}
                       <div>
                         <p className="font-semibold text-dark line-clamp-1">{isAr ? p.name_ar : p.name_en}</p>
@@ -281,6 +285,24 @@ export default function ProductsPage() {
                 </label>
                 <input type="date" value={form.deal_ends_at} onChange={e => setField('deal_ends_at', e.target.value)}
                   className="input-field" />
+              </div>
+
+              {/* ── Image Upload ── */}
+              <div>
+                <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                  <Image size={13} />
+                  {isAr ? 'صور المنتج' : 'Product Images'}
+                  <span className="ms-auto font-normal normal-case">
+                    {isAr
+                      ? 'الصورة الأولى هي الصورة الرئيسية'
+                      : 'First image is the primary/cover image'}
+                  </span>
+                </label>
+                <ImageUploader
+                  images={form.images}
+                  onChange={(urls) => setField('images', urls)}
+                  max={8}
+                />
               </div>
             </div>
 

@@ -6,6 +6,7 @@ import { productsService, categoriesService } from '../services';
 import ProductCard from '../components/product/ProductCard';
 import Skeleton from '../components/ui/Skeleton';
 import SEO from '../components/common/SEO';
+import { resolveImages } from '../utils/imageUrl';
 
 const SORT_OPTIONS = [
   { value: 'latest',     labelAr: 'الأحدث',        labelEn: 'Latest' },
@@ -229,7 +230,7 @@ export default function Products() {
                     price: parseFloat(p.price),
                     originalPrice: p.original_price ? parseFloat(p.original_price) : null,
                     discountPercent: p.discount_percent,
-                    images: p.images || [],
+                    images: resolveImages(p.images),
                     rating: parseFloat(p.avg_rating) || 0,
                     reviewCount: p.review_count || 0,
                     dealEndsAt: p.deal_ends_at,
