@@ -6,7 +6,11 @@
     "mobiles": "Mobiles & Accessories",
     "clothes": "Clothes",
     "beauty": "Beauty",
-    "furniture": "Furniture"
+    "furniture": "Furniture",
+    "washing_machines": "Washing Machines",
+    "refrigerators": "Refrigerators",
+    "vacuums": "Vacuums",
+    "ac": "Air Conditioners"
   },
   "header": {
     "welcome": "Welcome to ECAVO Store",

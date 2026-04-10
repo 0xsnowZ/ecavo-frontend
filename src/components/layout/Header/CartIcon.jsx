@@ -1,4 +1,4 @@
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCartStore } from '../../../store/useCartStore';
 import { useLocaleStore } from '../../../store/useLocaleStore';
@@ -23,7 +23,7 @@ export default function CartIcon({ onOpen }) {
         <span className="text-sm font-bold text-secondary">{displayTotal}</span>
       </div>
       <div className="relative">
-        <ShoppingBag
+        <ShoppingCart
           size={26}
           className="text-secondary group-hover:text-primary transition-colors"
         />

@@ -3,12 +3,14 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ShoppingCart, Heart, ChevronLeft, ChevronRight,
-  Star, Truck, RefreshCcw, ShieldCheck, Minus, Plus,
+  Star, Truck, RefreshCcw, ShieldCheck, Minus, Plus, Share2
 } from 'lucide-react';
-import { productsService } from '../services';
+import { productsService, recentlyViewedService } from '../services';
 import { useCartStore } from '../store/useCartStore';
 import { useWishlistStore } from '../store/useWishlistStore';
 import { useLocaleStore } from '../store/useLocaleStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { pushRvId } from '../utils/recentlyViewed';
 import StarRating from '../components/ui/StarRating';
 import Spinner from '../components/ui/Spinner';
 import CountdownTimer from '../components/ui/CountdownTimer';
@@ -25,6 +27,7 @@ export default function ProductDetail() {
   const { currency } = useLocaleStore();
   const addItem = useCartStore(s => s.addItem);
   const { toggle, isInWishlist } = useWishlistStore();
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +45,14 @@ export default function ProductDetail() {
         setProduct(p);
         // Auto-select first variant if exists
         if (p.variants?.length > 0) setSelectedVariant(p.variants[0]);
+
+        // ── Track recently viewed ────────────────────────────────────────
+        // Always push to localStorage (works for guests and logged-in users)
+        pushRvId(p.id);
+        // Additionally persist to the DB for logged-in users (fire-and-forget)
+        if (isAuthenticated) {
+          recentlyViewedService.track(p.id).catch(() => { });
+        }
       })
       .catch(() => navigate('/products'))
       .finally(() => setLoading(false));
@@ -55,9 +66,9 @@ export default function ProductDetail() {
 
   if (!product) return null;
 
-  const name        = getLocalized(product, 'name', i18n.language);
+  const name = getLocalized(product, 'name', i18n.language);
   const description = getLocalized(product, 'description', i18n.language);
-  const basePrice   = parseFloat(product.price) + (selectedVariant ? parseFloat(selectedVariant.extra_price) : 0);
+  const basePrice = parseFloat(product.price) + (selectedVariant ? parseFloat(selectedVariant.extra_price) : 0);
   const displayPrice = `${currency.symbol}${(basePrice * currency.rate).toFixed(2)}`;
   const displayOriginal = product.original_price
     ? `${currency.symbol}${(parseFloat(product.original_price) * currency.rate).toFixed(2)}`
@@ -69,6 +80,24 @@ export default function ProductDetail() {
     addItem({ ...product, price: basePrice }, qty, selectedVariant);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: name,
+      text: description,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert(isAr ? 'تم نسخ الرابط!' : 'Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.log('Error sharing:', err);
+    }
   };
 
   // Group variants by attribute type
@@ -92,46 +121,50 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
         {/* ── Image Gallery ── */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {/* Main image */}
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-50 group">
+          <div className="relative aspect-[4/5] sm:aspect-square overflow-hidden bg-gray-50 group">
             <img
               src={images[activeImg]}
               alt={name}
-              className="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             {product.discount_percent && (
-              <span className="badge-discount text-sm px-3 py-1">{product.discount_percent}%</span>
+              <div className="absolute top-4 end-4 w-12 h-12 bg-black text-white rounded-full flex flex-col items-center justify-center text-[11px] font-bold leading-tight shadow-md z-10">
+                <span>{product.discount_percent}%</span>
+                <span>OFF</span>
+              </div>
             )}
             {/* Arrows */}
             {images.length > 1 && (
               <>
                 <button
                   onClick={() => setActiveImg(i => (i - 1 + images.length) % images.length)}
-                  className="absolute start-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute start-4 top-1/2 -translate-y-1/2 text-dark/50 hover:text-dark transition-colors z-10"
                 >
-                  <ChevronLeft size={18} className="rtl-flip" />
+                  <ChevronLeft size={32} strokeWidth={1.5} className="rtl-flip" />
                 </button>
                 <button
                   onClick={() => setActiveImg(i => (i + 1) % images.length)}
-                  className="absolute end-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute end-4 top-1/2 -translate-y-1/2 text-dark/50 hover:text-dark transition-colors z-10"
                 >
-                  <ChevronRight size={18} className="rtl-flip" />
+                  <ChevronRight size={32} strokeWidth={1.5} className="rtl-flip" />
                 </button>
               </>
             )}
           </div>
+
           {/* Thumbnails */}
           {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
               {images.map((src, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}
-                  className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all
-                    ${i === activeImg ? 'border-primary' : 'border-transparent hover:border-gray-300'}`}
+                  className={`relative aspect-square overflow-hidden transition-all
+                    ${i === activeImg ? 'ring-2 ring-offset-2 ring-black' : 'hover:opacity-80'}`}
                 >
-                  <img src={src} className="w-full h-full object-contain bg-gray-50 p-1" alt="" />
+                  <img src={src} className="w-full h-full object-cover bg-gray-50 bg-center" alt="" />
                 </button>
               ))}
             </div>
@@ -200,20 +233,20 @@ export default function ProductDetail() {
             </div>
           ))}
 
-          {/* Quantity + Add to Cart */}
-          <div className="flex items-center gap-3">
+          {/* Actions: Qty, Add to Cart, Wishlist, Share */}
+          <div className="flex flex-wrap items-center gap-3">
             {/* Qty */}
-            <div className="flex items-center border-2 border-border rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between border-2 border-border rounded-xl overflow-hidden shrink-0 flex-1 sm:flex-none">
               <button
                 onClick={() => setQty(q => Math.max(1, q - 1))}
-                className="px-3 py-3 hover:bg-gray-100 transition-colors text-muted hover:text-dark"
+                className="px-4 py-3 hover:bg-gray-100 transition-colors text-muted hover:text-dark"
               >
                 <Minus size={16} />
               </button>
-              <span className="w-10 text-center font-bold text-dark">{qty}</span>
+              <span className="w-8 text-center font-bold text-dark">{qty}</span>
               <button
                 onClick={() => setQty(q => Math.min(product.stock, q + 1))}
-                className="px-3 py-3 hover:bg-gray-100 transition-colors text-muted hover:text-dark"
+                className="px-4 py-3 hover:bg-gray-100 transition-colors text-muted hover:text-dark"
               >
                 <Plus size={16} />
               </button>
@@ -224,6 +257,7 @@ export default function ProductDetail() {
               onClick={handleAddToCart}
               disabled={product.stock === 0}
               className={`btn-primary flex-1 justify-center py-3 text-base transition-all
+                order-last sm:order-none min-w-full sm:min-w-0
                 ${addedToCart ? 'bg-green-500 hover:bg-green-600' : ''}`}
             >
               <ShoppingCart size={20} />
@@ -235,12 +269,22 @@ export default function ProductDetail() {
             {/* Wishlist */}
             <button
               onClick={() => toggle({ id: product.id, slug, name, price: basePrice, images })}
-              className={`p-3 rounded-xl border-2 transition-all
+              className={`p-3 rounded-xl border-2 transition-all shrink-0
                 ${wishlisted
                   ? 'border-primary bg-primary/10 text-primary'
                   : 'border-border text-muted hover:border-primary hover:text-primary'}`}
+              aria-label={t('products.add_to_wishlist') || 'Wishlist'}
             >
               <Heart size={20} fill={wishlisted ? 'currentColor' : 'none'} />
+            </button>
+
+            {/* Share */}
+            <button
+              onClick={handleShare}
+              className="p-3 rounded-xl border-2 border-border transition-all text-muted hover:border-primary hover:text-primary shrink-0"
+              aria-label="Share product"
+            >
+              <Share2 size={20} />
             </button>
           </div>
 
@@ -251,9 +295,9 @@ export default function ProductDetail() {
           {/* Trust badges */}
           <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border">
             {[
-              { icon: Truck,       titleKey: 'features.free_shipping',     descKey: 'features.free_shipping_desc' },
-              { icon: RefreshCcw,  titleKey: 'features.money_guarantee',   descKey: 'features.money_guarantee_desc' },
-              { icon: ShieldCheck, titleKey: 'features.secure_payment',    descKey: 'features.secure_payment_desc' },
+              { icon: Truck, titleKey: 'features.free_shipping', descKey: 'features.free_shipping_desc' },
+              { icon: RefreshCcw, titleKey: 'features.money_guarantee', descKey: 'features.money_guarantee_desc' },
+              { icon: ShieldCheck, titleKey: 'features.secure_payment', descKey: 'features.secure_payment_desc' },
             ].map(({ icon: Icon, titleKey, descKey }) => (
               <div key={titleKey} className="flex flex-col items-center text-center gap-1 p-3 rounded-xl bg-surface">
                 <Icon size={20} className="text-secondary" />
@@ -269,9 +313,9 @@ export default function ProductDetail() {
       <div className="mt-10">
         <div className="flex border-b border-border gap-1">
           {[
-            { id: 'description',   labelAr: 'الوصف',        labelEn: 'Description' },
-            { id: 'specifications',labelAr: 'المواصفات',    labelEn: 'Specifications' },
-            { id: 'reviews',       labelAr: 'التقييمات',    labelEn: 'Reviews' },
+            { id: 'description', labelAr: 'الوصف', labelEn: 'Description' },
+            { id: 'specifications', labelAr: 'المواصفات', labelEn: 'Specifications' },
+            { id: 'reviews', labelAr: 'التقييمات', labelEn: 'Reviews' },
           ].map(tab => (
             <button
               key={tab.id}

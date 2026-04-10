@@ -6,7 +6,11 @@
     "mobiles": "Mobiles & Accessoires",
     "clothes": "Vêtements",
     "beauty": "Beauté",
-    "furniture": "Meubles"
+    "furniture": "Meubles",
+    "washing_machines": "Lave-linge",
+    "refrigerators": "Réfrigérateurs",
+    "vacuums": "Aspirateurs",
+    "ac": "Climatiseurs"
   },
   "header": {
     "welcome": "Bienvenue sur ECAVO",

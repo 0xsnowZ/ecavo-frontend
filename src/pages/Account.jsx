@@ -37,6 +37,7 @@ export default function Account() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [profileForm, setProfileForm] = useState({ name: user?.name || '', phone: user?.phone || '' });
+  const [avatarFile, setAvatarFile] = useState(null);
   const [saving, setSaving]   = useState(false);
   const [saveOk, setSaveOk]   = useState(false);
 
@@ -56,13 +57,26 @@ export default function Account() {
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      // In Sprint 4 we'll add a PUT /api/profile endpoint; for now update local store
-      updateUser(profileForm);
+      const form = new FormData();
+      form.append('name', profileForm.name);
+      form.append('phone', profileForm.phone || '');
+      if (avatarFile) form.append('avatar', avatarFile);
+
+      const res = await authService.updateProfile(form);
+      updateUser(res.data.user);
       setEditMode(false);
       setSaveOk(true);
       setTimeout(() => setSaveOk(false), 2000);
+    } catch (err) {
+      console.error('Failed to update profile', err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAvatarChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setAvatarFile(e.target.files[0]);
     }
   };
 
@@ -82,9 +96,37 @@ export default function Account() {
           <div className="card p-5">
             {/* Avatar */}
             <div className="flex flex-col items-center gap-2 text-center pb-5 border-b border-border mb-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black">
-                {user?.name?.[0]?.toUpperCase() ?? 'U'}
-              </div>
+              <label 
+                htmlFor="avatarUpload" 
+                className={`relative w-20 h-20 rounded-full flex items-center justify-center text-primary text-3xl font-black mb-1
+                  ${!user?.avatar && !avatarFile ? 'bg-primary/10' : ''} ${editMode ? 'cursor-pointer group' : ''}`}
+              >
+                {(avatarFile || user?.avatar) ? (
+                  <img 
+                    src={avatarFile ? URL.createObjectURL(avatarFile) : user.avatar} 
+                    alt="Avatar" 
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover rounded-full shadow-sm"
+                  />
+                ) : (
+                  user?.name?.[0]?.toUpperCase() ?? 'U'
+                )}
+
+                {editMode && (
+                  <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Edit2 size={20} className="text-white" />
+                  </div>
+                )}
+              </label>
+              {editMode && (
+                <input 
+                  type="file" 
+                  id="avatarUpload" 
+                  accept="image/png, image/jpeg, image/webp" 
+                  className="hidden" 
+                  onChange={handleAvatarChange} 
+                />
+              )}
               <p className="font-bold text-dark">{user?.name}</p>
               <p className="text-xs text-muted">{user?.email}</p>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${user?.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600'}`}>
@@ -282,7 +324,11 @@ export default function Account() {
                   <button onClick={handleSaveProfile} disabled={saving} className="btn-primary">
                     {saving ? <Loader2 size={16} className="animate-spin" /> : t('account_page.save')}
                   </button>
-                  <button onClick={() => { setEditMode(false); setProfileForm({ name: user?.name, phone: user?.phone }); }}
+                  <button onClick={() => { 
+                      setEditMode(false); 
+                      setProfileForm({ name: user?.name, phone: user?.phone }); 
+                      setAvatarFile(null); 
+                    }}
                     className="btn-ghost">
                     {t('account_page.cancel')}
                   </button>

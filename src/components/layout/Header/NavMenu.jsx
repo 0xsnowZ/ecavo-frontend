@@ -9,10 +9,10 @@ const NAV_ITEMS = [
     key: 'nav.appliances',
     to: '/categories/appliances',
     children: [
-      { label: 'غسالات', to: '/products?cat=washing-machines' },
-      { label: 'ثلاجات', to: '/products?cat=refrigerators' },
-      { label: 'مكانس', to: '/products?cat=vacuums' },
-      { label: 'شبابيك', to: '/products?cat=ac' },
+      { key: 'nav.washing_machines', to: '/products?cat=washing-machines' },
+      { key: 'nav.refrigerators', to: '/products?cat=refrigerators' },
+      { key: 'nav.vacuums', to: '/products?cat=vacuums' },
+      { key: 'nav.ac', to: '/products?cat=ac' },
     ],
   },
   { key: 'nav.houseware', to: '/categories/houseware' },
@@ -59,7 +59,7 @@ export default function NavMenu() {
                   to={child.to}
                   className="block px-4 py-2.5 text-sm text-dark hover:bg-primary/5 hover:text-primary transition-colors first:rounded-t-xl last:rounded-b-xl"
                 >
-                  {child.label}
+                  {t(child.key)}
                 </NavLink>
               ))}
             </div>

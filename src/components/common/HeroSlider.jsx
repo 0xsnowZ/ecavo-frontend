@@ -10,12 +10,18 @@ import slide3 from '../../assets/img/slide3.jpg';
 import slide4 from '../../assets/img/slide4.jpg';
 import slide5 from '../../assets/img/slide5.jpg';
 
+import { useTranslation } from 'react-i18next';
+
 const SLIDES = [slide1, slide2, slide3, slide4, slide5];
 
 export default function HeroSlider() {
+  const { i18n } = useTranslation();
+  
   return (
-    <div className="rounded-lg overflow-hidden shadow-card flex-1">
+    <div className="hero-slider-wrapper rounded-lg overflow-hidden shadow-card flex-1">
       <Swiper
+        key={i18n.language}
+        dir={i18n.dir()}
         modules={[Autoplay, Pagination, Navigation]}
         spaceBetween={0}
         slidesPerView={1}
@@ -30,7 +36,6 @@ export default function HeroSlider() {
             <img
               src={src}
               alt={`slide-${i + 1}`}
-              className="w-full rounded-lg"
               loading={i === 0 ? 'eager' : 'lazy'}
             />
           </SwiperSlide>

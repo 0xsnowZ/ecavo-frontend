@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Mail, Lock, Eye, EyeOff, User, Phone, Loader2 } from 'lucide-react';
 import { authService } from '../services';
+import { GOOGLE_AUTH_URL } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
+import googleIcon from '../assets/img/google.png';
 
 export default function Register() {
   const { t, i18n } = useTranslation();
@@ -42,7 +44,7 @@ export default function Register() {
     setLoading(true);
     try {
       const res = await authService.register(form);
-      setAuth(res.data.user, res.data.token);
+      setAuth(res.data.user);  // token lives in HTTP-only cookie, not here
       navigate('/');
     } catch (err) {
       const data = err.response?.data;
@@ -152,6 +154,22 @@ export default function Register() {
               {loading ? <Loader2 size={20} className="animate-spin" /> : t('auth.register')}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted">or</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          {/* Google OAuth — direct browser navigation, no XHR */}
+          <a
+            href={GOOGLE_AUTH_URL}
+            className="w-full flex items-center justify-center gap-3 border-2 border-border rounded-lg py-2.5 text-sm font-semibold text-dark hover:bg-gray-50 transition-colors"
+          >
+            <img src={googleIcon} alt="Google" className="w-5 h-5 object-contain" />
+            {t('auth.google')}
+          </a>
 
           <p className="text-center text-sm text-muted mt-6">
             {t('auth.has_account')}{' '}

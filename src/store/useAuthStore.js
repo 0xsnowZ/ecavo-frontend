@@ -1,19 +1,22 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { clearRvIds } from '../utils/recentlyViewed';
 
 export const useAuthStore = create(
   persist(
     (set, get) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
 
-      setAuth: (user, token) => {
-        set({ user, token, isAuthenticated: true });
+      // Called after login, register, or /auth/me bootstrap
+      setAuth: (user) => {
+        set({ user, isAuthenticated: true });
       },
 
       logout: () => {
-        set({ user: null, token: null, isAuthenticated: false });
+        // Clear the recently-viewed list on logout
+        clearRvIds();
+        set({ user: null, isAuthenticated: false });
       },
 
       updateUser: (data) => {
@@ -24,6 +27,9 @@ export const useAuthStore = create(
     }),
     {
       name: 'ecavo-auth',
+      // Only persist the user object — the actual auth token lives
+      // in an HTTP-only cookie managed entirely by the browser.
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
     }
   )
 );

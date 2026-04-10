@@ -13,7 +13,8 @@ import BannerGrid from '../components/common/BannerGrid';
 import SectionTitle from '../components/common/SectionTitle';
 import ProductCard from '../components/product/ProductCard';
 import Skeleton from '../components/ui/Skeleton';
-import { productsService } from '../services';
+import { productsService, recentlyViewedService } from '../services';
+import { getRvIds } from '../utils/recentlyViewed';
 import { resolveImages } from '../utils/imageUrl';
 import { getLocalized } from '../utils/localize';
 
@@ -100,6 +101,7 @@ export default function Home() {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
 
+
   const [deals, setDeals] = useState([]);
   const [sale, setSale] = useState([]);
   const [electronics, setElectronics] = useState([]);
@@ -157,21 +159,30 @@ export default function Home() {
       .finally(() => setLoadingAppliances(false));
   }, [isAr]);
 
-  // Viewed products section
+  // Recently Viewed — always localStorage-driven (guests & auth users alike)
   useEffect(() => {
-    productsService.list({ sort: 'latest', per_page: 10 })
+    const ids = getRvIds();
+    if (ids.length === 0) {
+      setViewed([]);
+      setLoadingViewed(false);
+      return;
+    }
+    setLoadingViewed(true);
+    recentlyViewedService.get(ids)
       .then(r => setViewed((r.data.data || []).map(p => toCard(p))))
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => setLoadingViewed(false));
-  }, [isAr]);
+  // Re-run only once on mount; isAuthenticated not needed here
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div>
       {/* Hero: Sidebar + Slider */}
       <section className="container-main py-4">
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-stretch h-[360px] lg:h-[420px]">
           {/* Category Sidebar */}
-          <aside className="hidden lg:flex flex-col w-56 shrink-0 bg-white rounded-lg shadow-card p-3">
+          <aside className="hidden lg:flex flex-col w-56 shrink-0 bg-white rounded-lg shadow-card p-3 h-full overflow-y-auto">
             <h5 className="text-xs font-bold uppercase tracking-wider text-muted px-2 mb-2">
               {t('sidebar.shop_by')}
             </h5>
@@ -223,6 +234,7 @@ export default function Home() {
           loading={loadingDeals}
           slidesPerView={{ base: 2, sm: 2, lg: 3, xl: 4 }}
           showCountdown
+          
         />
       </section>
 
@@ -330,20 +342,22 @@ export default function Home() {
         />
       </section>
 
-      {/* Viewed Products */}
-      <section className="container-main py-6">
-        <div className="flex items-center justify-between mb-4">
-          <SectionTitle title={t('products.viewed_products')} />
-          <Link to="/products?sort=latest" className="text-sm text-primary hover:underline flex items-center gap-1">
-            {t('products.view_all')} <ChevronRight size={14} className="rtl-flip" />
-          </Link>
-        </div>
-        <ProductCarousel
-          products={viewed}
-          loading={loadingViewed}
-          slidesPerView={{ base: 2, sm: 3, lg: 4, xl: 5 }}
-        />
-      </section>
+      {/* Viewed Products — only render when there is actual history */}
+      {(loadingViewed || viewed.length > 0) && (
+        <section className="container-main py-6">
+          <div className="flex items-center justify-between mb-4">
+            <SectionTitle title={t('products.viewed_products')} />
+            <Link to="/products?sort=latest" className="text-sm text-primary hover:underline flex items-center gap-1">
+              {t('products.view_all')} <ChevronRight size={14} className="rtl-flip" />
+            </Link>
+          </div>
+          <ProductCarousel
+            products={viewed}
+            loading={loadingViewed}
+            slidesPerView={{ base: 2, sm: 3, lg: 4, xl: 5 }}
+          />
+        </section>
+      )}
     </div>
   );
 }

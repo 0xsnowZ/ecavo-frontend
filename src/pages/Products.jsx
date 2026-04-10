@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { SlidersHorizontal, Grid2X2, List, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { SlidersHorizontal, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { productsService, categoriesService } from '../services';
 import ProductCard from '../components/product/ProductCard';
 import Skeleton from '../components/ui/Skeleton';
@@ -10,11 +10,11 @@ import { resolveImages } from '../utils/imageUrl';
 import { getLocalized } from '../utils/localize';
 
 const SORT_OPTIONS = [
-  { value: 'latest',     labelAr: 'الأحدث',        labelEn: 'Latest' },
-  { value: 'price_asc',  labelAr: 'السعر: الأقل',  labelEn: 'Price: Low to High' },
+  { value: 'latest', labelAr: 'الأحدث', labelEn: 'Latest' },
+  { value: 'price_asc', labelAr: 'السعر: الأقل', labelEn: 'Price: Low to High' },
   { value: 'price_desc', labelAr: 'السعر: الأعلى', labelEn: 'Price: High to Low' },
-  { value: 'popular',    labelAr: 'الأكثر شعبية',  labelEn: 'Most Popular' },
-  { value: 'discount',   labelAr: 'أكبر خصم',      labelEn: 'Biggest Discount' },
+  { value: 'popular', labelAr: 'الأكثر شعبية', labelEn: 'Most Popular' },
+  { value: 'discount', labelAr: 'أكبر خصم', labelEn: 'Biggest Discount' },
 ];
 
 export default function Products() {
@@ -27,13 +27,12 @@ export default function Products() {
   const [meta, setMeta] = useState({ total: 0, current_page: 1, last_page: 1 });
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // grid | list
 
   // Params from URL
-  const page     = parseInt(searchParams.get('page') || '1');
-  const sort     = searchParams.get('sort') || 'latest';
+  const page = parseInt(searchParams.get('page') || '1');
+  const sort = searchParams.get('sort') || 'latest';
   const category = searchParams.get('category') || '';
-  const search   = searchParams.get('search') || '';
+  const search = searchParams.get('search') || '';
   const minPrice = searchParams.get('min_price') || '';
   const maxPrice = searchParams.get('max_price') || '';
 
@@ -76,7 +75,7 @@ export default function Products() {
           >
             {isAr ? 'الكل' : 'All'}
           </button>
-            {categories.map(c => (
+          {categories.map(c => (
             <button
               key={c.slug}
               onClick={() => setParam('category', c.slug)}
@@ -136,161 +135,141 @@ export default function Products() {
         lang={isAr ? 'ar' : 'en'}
       />
       <div className="container-main py-8">
-      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
 
-        {/* ── Sidebar Filters (desktop) ── */}
-        <aside className="hidden lg:block w-56 shrink-0">
-          <div className="card p-5 sticky top-24">
-            <h2 className="section-title text-lg mb-4">
-              {isAr ? 'تصفية النتائج' : 'Filter Results'}
-            </h2>
-            <FilterPanel />
-          </div>
-        </aside>
-
-        {/* ── Main content ── */}
-        <div className="flex-1 min-w-0">
-
-          {/* Top bar: results count + sort + view toggle */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-            <div>
-              {search && (
-                <p className="text-sm text-muted mb-1">
-                  {isAr ? `نتائج البحث عن: "${search}"` : `Results for: "${search}"`}
-                </p>
-              )}
-              <p className="text-sm text-muted">
-                {isAr ? `${meta.total} منتج` : `${meta.total} products`}
-              </p>
+          {/* ── Sidebar Filters (desktop) ── */}
+          <aside className="hidden lg:block w-56 shrink-0">
+            <div className="card p-5 sticky top-24">
+              <h2 className="section-title text-lg mb-4">
+                {isAr ? 'تصفية النتائج' : 'Filter Results'}
+              </h2>
+              <FilterPanel />
             </div>
+          </aside>
 
-            <div className="flex items-center gap-2">
-              {/* Mobile filter button */}
-              <button
-                onClick={() => setFiltersOpen(true)}
-                className="lg:hidden btn-ghost text-sm py-2 border border-border"
-              >
-                <SlidersHorizontal size={16} />
-                {isAr ? 'فلتر' : 'Filter'}
-              </button>
+          {/* ── Main content ── */}
+          <div className="flex-1 min-w-0">
 
-              {/* Sort */}
-              <select
-                value={sort}
-                onChange={e => setParam('sort', e.target.value)}
-                className="input-field w-auto text-sm"
-              >
-                {SORT_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>
-                    {isAr ? o.labelAr : o.labelEn}
-                  </option>
-                ))}
-              </select>
+            {/* Top bar: results count + sort + view toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div>
+                {search && (
+                  <p className="text-sm text-muted mb-1">
+                    {isAr ? `نتائج البحث عن: "${search}"` : `Results for: "${search}"`}
+                  </p>
+                )}
+                <p className="text-sm text-muted">
+                  {isAr ? `${meta.total} منتج` : `${meta.total} products`}
+                </p>
+              </div>
 
-              {/* View toggle */}
-              <div className="hidden sm:flex border border-border rounded-lg overflow-hidden">
+              <div className="flex items-center gap-2">
+                {/* Mobile filter button */}
                 <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted hover:bg-gray-100'}`}
+                  onClick={() => setFiltersOpen(true)}
+                  className="lg:hidden btn-ghost text-sm py-2 border border-border"
                 >
-                  <Grid2X2 size={16} />
+                  <SlidersHorizontal size={16} />
+                  {isAr ? 'فلتر' : 'Filter'}
                 </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted hover:bg-gray-100'}`}
+
+                {/* Sort */}
+                <select
+                  value={sort}
+                  onChange={e => setParam('sort', e.target.value)}
+                  className="input-field w-auto text-sm"
                 >
-                  <List size={16} />
-                </button>
+                  {SORT_OPTIONS.map(o => (
+                    <option key={o.value} value={o.value}>
+                      {isAr ? o.labelAr : o.labelEn}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
-          </div>
 
-          {/* Products grid */}
-          {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-              {Array.from({ length: 8 }, (_, i) => <Skeleton.Card key={i} />)}
-            </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-24">
-              <p className="text-2xl text-gray-300 mb-2">🔍</p>
-              <p className="text-muted">{isAr ? 'لا توجد منتجات' : 'No products found'}</p>
-            </div>
-          ) : (
-            <div className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4'
-                : 'flex flex-col gap-4'
-            }>
-              {products.map(p => (
-                <ProductCard
-                  key={p.id}
-                  product={{
-                    id: p.id,
-                    slug: p.slug,
-                    name_ar: p.name_ar,
-                    name_en: p.name_en,
-                    name_fr: p.name_fr,
-                    price: parseFloat(p.price),
-                    originalPrice: p.original_price ? parseFloat(p.original_price) : null,
-                    discountPercent: p.discount_percent,
-                    images: resolveImages(p.images),
-                    rating: parseFloat(p.avg_rating) || 0,
-                    reviewCount: p.review_count || 0,
-                    dealEndsAt: p.deal_ends_at,
-                  }}
-                  showCountdown={!!p.deal_ends_at}
-                />
-              ))}
-            </div>
-          )}
+            {/* Products grid */}
+            {loading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }, (_, i) => <Skeleton.Card key={i} />)}
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-24">
+                <p className="text-2xl text-gray-300 mb-2">🔍</p>
+                <p className="text-muted">{isAr ? 'لا توجد منتجات' : 'No products found'}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+                {products.map(p => (
+                  <ProductCard
+                    key={p.id}
+                    product={{
+                      id: p.id,
+                      slug: p.slug,
+                      name_ar: p.name_ar,
+                      name_en: p.name_en,
+                      name_fr: p.name_fr,
+                      price: parseFloat(p.price),
+                      originalPrice: p.original_price ? parseFloat(p.original_price) : null,
+                      discountPercent: p.discount_percent,
+                      images: resolveImages(p.images),
+                      rating: parseFloat(p.avg_rating) || 0,
+                      reviewCount: p.review_count || 0,
+                      dealEndsAt: p.deal_ends_at,
+                    }}
+                    showCountdown={!!p.deal_ends_at}
+                  />
+                ))}
+              </div>
+            )}
 
-          {/* Pagination */}
-          {meta.last_page > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
-              <button
-                disabled={page <= 1}
-                onClick={() => setParam('page', page - 1)}
-                className="btn-ghost p-2 disabled:opacity-40"
-              >
-                <ChevronLeft size={18} className="rtl-flip" />
-              </button>
-              {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(p => (
+            {/* Pagination */}
+            {meta.last_page > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
                 <button
-                  key={p}
-                  onClick={() => setParam('page', p)}
-                  className={`w-9 h-9 rounded-lg text-sm font-semibold transition-colors
-                    ${p === page ? 'bg-primary text-white' : 'text-muted hover:bg-gray-100'}`}
+                  disabled={page <= 1}
+                  onClick={() => setParam('page', page - 1)}
+                  className="btn-ghost p-2 disabled:opacity-40"
                 >
-                  {p}
+                  <ChevronLeft size={18} className="rtl-flip" />
                 </button>
-              ))}
-              <button
-                disabled={page >= meta.last_page}
-                onClick={() => setParam('page', page + 1)}
-                className="btn-ghost p-2 disabled:opacity-40"
-              >
-                <ChevronRight size={18} className="rtl-flip" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Mobile Filters Drawer ── */}
-      {filtersOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setFiltersOpen(false)} />
-          <div className="relative ms-auto w-72 h-full bg-white shadow-2xl p-5 overflow-y-auto animate-slide-down">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-secondary">{isAr ? 'الفلاتر' : 'Filters'}</h2>
-              <button onClick={() => setFiltersOpen(false)} className="text-muted hover:text-dark">
-                <X size={20} />
-              </button>
-            </div>
-            <FilterPanel />
+                {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setParam('page', p)}
+                    className={`w-9 h-9 rounded-lg text-sm font-semibold transition-colors
+                    ${p === page ? 'bg-primary text-white' : 'text-muted hover:bg-gray-100'}`}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  disabled={page >= meta.last_page}
+                  onClick={() => setParam('page', page + 1)}
+                  className="btn-ghost p-2 disabled:opacity-40"
+                >
+                  <ChevronRight size={18} className="rtl-flip" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
-      )}
+
+        {/* ── Mobile Filters Drawer ── */}
+        {filtersOpen && (
+          <div className="fixed inset-0 z-50 flex lg:hidden">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setFiltersOpen(false)} />
+            <div className="relative ms-auto w-72 h-full bg-white shadow-2xl p-5 overflow-y-auto animate-slide-down">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-bold text-secondary">{isAr ? 'الفلاتر' : 'Filters'}</h2>
+                <button onClick={() => setFiltersOpen(false)} className="text-muted hover:text-dark">
+                  <X size={20} />
+                </button>
+              </div>
+              <FilterPanel />
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

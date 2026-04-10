@@ -5,6 +5,9 @@ export const authService = {
   register: (data) => api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
+  updateProfile: (data) => api.post('/auth/profile', data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 };
 
 export const productsService = {
@@ -36,6 +39,19 @@ export const ordersService = {
 export const wishlistService = {
   get: () => api.get('/wishlist'),
   toggle: (productId) => api.post(`/wishlist/toggle/${productId}`),
+};
+
+export const recentlyViewedService = {
+  /**
+   * Fetch products for recently-viewed IDs.
+   * Pass an array of IDs for guest mode, omit for auth mode.
+   */
+  get: (ids = []) => {
+    if (ids.length === 0) return api.get('/recently-viewed');
+    return api.get('/recently-viewed', { params: { ids: ids.join(',') } });
+  },
+  /** Record a view for the logged-in user (fire-and-forget). */
+  track: (productId) => api.post(`/recently-viewed/${productId}`),
 };
 
 export const adminService = {

@@ -16,15 +16,15 @@ export default function ProductCard({ product, showCountdown = false }) {
   const { toggle, isInWishlist } = useWishlistStore();
 
   // Pages normalize API data to camelCase; raw API uses snake_case — support both
-  const id               = product.id;
-  const slug             = product.slug;
-  const price            = product.price;
-  const images           = product.images;
-  const originalPrice    = product.originalPrice    ?? product.original_price    ?? null;
-  const discountPercent  = product.discountPercent  ?? product.discount_percent  ?? null;
-  const avgRating        = product.rating           ?? product.avg_rating        ?? 0;
-  const reviewCount      = product.reviewCount      ?? product.review_count      ?? 0;
-  const dealEndsAt       = product.dealEndsAt       ?? product.deal_ends_at      ?? null;
+  const id = product.id;
+  const slug = product.slug;
+  const price = product.price;
+  const images = product.images;
+  const originalPrice = product.originalPrice ?? product.original_price ?? null;
+  const discountPercent = product.discountPercent ?? product.discount_percent ?? null;
+  const avgRating = product.rating ?? product.avg_rating ?? 0;
+  const reviewCount = product.reviewCount ?? product.review_count ?? 0;
+  const dealEndsAt = product.dealEndsAt ?? product.deal_ends_at ?? null;
 
   const name = getLocalized(product, 'name', i18n.language);
   const description = getLocalized(product, 'description', i18n.language);
@@ -37,7 +37,7 @@ export default function ProductCard({ product, showCountdown = false }) {
   const qtyInCart = items.find((i) => i.product.id === id)?.qty || 0;
 
   return (
-    <div className="card group relative overflow-hidden flex flex-col">
+    <div className="card group relative overflow-hidden flex flex-col h-full">
       {/* Discount badge */}
       {discountPercent && (
         <span className="badge-discount">{discountPercent}%</span>
@@ -64,20 +64,16 @@ export default function ProductCard({ product, showCountdown = false }) {
       </div>
 
       {/* Image */}
-      <Link to={`/products/${slug}`} className="product-img-wrapper h-52 bg-gray-50">
+      <Link
+        to={`/products/${slug}`}
+        className="product-img-wrapper h-[240px] w-full shrink-0 flex-none bg-white flex items-center justify-center overflow-hidden"
+      >
         <img
           src={images?.[0]}
           alt={name}
-          className="primary-img w-full h-full object-contain transition-opacity duration-300 p-4"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
         />
-        {images?.[1] && (
-          <img
-            src={images[1]}
-            alt={name}
-            className="hover-img object-contain p-4"
-          />
-        )}
       </Link>
 
       {/* Content */}
@@ -104,7 +100,7 @@ export default function ProductCard({ product, showCountdown = false }) {
               <del className="text-xs text-muted">{displayOriginal}</del>
             )}
           </div>
-          
+
           <button
             onClick={(e) => { e.preventDefault(); addItem(product); }}
             className="w-8 h-8 rounded-full border border-dark flex items-center justify-center text-dark hover:bg-dark hover:text-white transition-colors relative flex-shrink-0"

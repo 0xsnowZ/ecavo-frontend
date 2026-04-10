@@ -6,7 +6,11 @@
     "mobiles": "الموبايلات واكسسواراتها",
     "clothes": "الملابس",
     "beauty": "مستحضرات الجمال",
-    "furniture": "المفروشات"
+    "furniture": "المفروشات",
+    "washing_machines": "غسالات",
+    "refrigerators": "ثلاجات",
+    "vacuums": "مكانس",
+    "ac": "شبابيك"
   },
   "header": {
     "welcome": "مرحبا بكم في متجر إيكافو",

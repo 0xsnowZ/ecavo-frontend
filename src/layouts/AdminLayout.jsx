@@ -10,28 +10,28 @@ import useThemeStore from '../store/useThemeStore';
 import { useLocaleStore } from '../store/useLocaleStore';
 
 const adminLinks = [
-  { to: '/admin',            icon: LayoutDashboard, labelKey: 'admin.dashboard',  end: true },
-  { to: '/admin/orders',     icon: ShoppingCart,    labelKey: 'admin.all_orders' },
-  { to: '/admin/products',   icon: Package,         labelKey: 'admin.add_product' },
-  { to: '/admin/categories', icon: Tag,             labelKey: 'common.categories' },
-  { to: '/',                 icon: Store,           labelKey: 'admin.store' },
+  { to: '/admin', icon: LayoutDashboard, labelKey: 'admin.dashboard', end: true },
+  { to: '/admin/orders', icon: ShoppingCart, labelKey: 'admin.all_orders' },
+  { to: '/admin/products', icon: Package, labelKey: 'admin.add_product' },
+  { to: '/admin/categories', icon: Tag, labelKey: 'common.categories' },
+  { to: '/', icon: Store, labelKey: 'admin.store' },
 ];
 
 const PAGE_TITLES = {
-  '/admin':            { ar: 'لوحة التحكم',    en: 'Dashboard', fr: 'Tableau de Bord' },
-  '/admin/orders':     { ar: 'إدارة الطلبات',  en: 'Orders', fr: 'Commandes' },
-  '/admin/products':   { ar: 'إدارة المنتجات', en: 'Products', fr: 'Produits' },
-  '/admin/categories': { ar: 'إدارة الأقسام',  en: 'Categories', fr: 'Catégories' },
+  '/admin': { ar: 'لوحة التحكم', en: 'Dashboard', fr: 'Tableau de Bord' },
+  '/admin/orders': { ar: 'إدارة الطلبات', en: 'Orders', fr: 'Commandes' },
+  '/admin/products': { ar: 'إدارة المنتجات', en: 'Products', fr: 'Produits' },
+  '/admin/categories': { ar: 'إدارة الأقسام', en: 'Categories', fr: 'Catégories' },
 };
 
 export default function AdminLayout() {
-  const { t, i18n }                          = useTranslation();
-  const { user, logout }                     = useAuthStore();
-  const { dark, toggle }                     = useThemeStore();
+  const { t, i18n } = useTranslation();
+  const { user, logout } = useAuthStore();
+  const { dark, toggle } = useThemeStore();
   const { language } = useLocaleStore();
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const isAr      = language === 'ar';
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isAr = language === 'ar';
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -71,9 +71,9 @@ export default function AdminLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
                  ${isActive
-                   ? 'bg-primary text-white shadow-sm'
-                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
-                 }`
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                }`
               }
             >
               <Icon size={18} />
@@ -97,12 +97,12 @@ export default function AdminLayout() {
           >
             <span className="flex items-center gap-3">
               {dark
-                ? <Sun  size={18} className="text-yellow-400" />
+                ? <Sun size={18} className="text-yellow-400" />
                 : <Moon size={18} className="text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white" />
               }
               <span>
                 {dark
-                  ? (isAr ? 'الوضع الفاتح'  : 'Light Mode')
+                  ? (isAr ? 'الوضع الفاتح' : 'Light Mode')
                   : (isAr ? 'الوضع الداكن' : 'Dark Mode')
                 }
               </span>

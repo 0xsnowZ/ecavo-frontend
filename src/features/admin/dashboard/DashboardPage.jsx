@@ -11,22 +11,22 @@ import { adminService } from '../../../services';
 import Spinner from '../../../components/ui/Spinner';
 
 const STATUS_CONFIG = {
-  placed:            { labelAr: 'تم الطلب',       labelEn: 'Placed',        labelFr: 'Placé',               color: 'bg-blue-100 text-blue-700',    icon: ShoppingCart },
-  preparing:         { labelAr: 'يتم التجهيز',     labelEn: 'Preparing',     labelFr: 'En Préparation',      color: 'bg-indigo-100 text-indigo-700',icon: Package },
-  awaiting_shipment: { labelAr: 'انتظار الشحن',    labelEn: 'Awaiting Ship', labelFr: 'En Attente',          color: 'bg-yellow-100 text-yellow-700',icon: Package },
-  shipped:           { labelAr: 'تم الشحن',         labelEn: 'Shipped',       labelFr: 'Expédié',             color: 'bg-teal-100 text-teal-700',    icon: Truck },
-  in_transit:        { labelAr: 'في الطريق',        labelEn: 'In Transit',    labelFr: 'En Transit',          color: 'bg-purple-100 text-purple-700',icon: TrendingUp },
-  delivered:         { labelAr: 'تم الاستلام',      labelEn: 'Delivered',     labelFr: 'Livré',               color: 'bg-green-100 text-green-700',  icon: CheckCircle2 },
-  no_answer:         { labelAr: 'لا يرد',           labelEn: 'No Answer',     labelFr: 'Pas de Réponse',      color: 'bg-orange-100 text-orange-700',icon: PhoneOff },
-  postponed:         { labelAr: 'تم التأجيل',       labelEn: 'Postponed',     labelFr: 'Reporté',             color: 'bg-gray-100 text-gray-600',    icon: Clock },
-  wrong_address:     { labelAr: 'عنوان خاطئ',       labelEn: 'Wrong Address', labelFr: 'Mauvaise Adresse',    color: 'bg-red-100 text-red-500',      icon: MapPin },
-  cancelled:         { labelAr: 'تم الإلغاء',       labelEn: 'Cancelled',     labelFr: 'Annulé',              color: 'bg-red-100 text-red-600',      icon: XCircle },
-  returned:          { labelAr: 'تم الإرجاع',       labelEn: 'Returned',      labelFr: 'Retourné',            color: 'bg-pink-100 text-pink-700',    icon: RotateCcw },
+  placed: { labelAr: 'تم الطلب', labelEn: 'Placed', labelFr: 'Placé', color: 'bg-blue-100 text-blue-700', icon: ShoppingCart },
+  preparing: { labelAr: 'يتم التجهيز', labelEn: 'Preparing', labelFr: 'En Préparation', color: 'bg-indigo-100 text-indigo-700', icon: Package },
+  awaiting_shipment: { labelAr: 'انتظار الشحن', labelEn: 'Awaiting Ship', labelFr: 'En Attente', color: 'bg-yellow-100 text-yellow-700', icon: Package },
+  shipped: { labelAr: 'تم الشحن', labelEn: 'Shipped', labelFr: 'Expédié', color: 'bg-teal-100 text-teal-700', icon: Truck },
+  in_transit: { labelAr: 'في الطريق', labelEn: 'In Transit', labelFr: 'En Transit', color: 'bg-purple-100 text-purple-700', icon: TrendingUp },
+  delivered: { labelAr: 'تم الاستلام', labelEn: 'Delivered', labelFr: 'Livré', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
+  no_answer: { labelAr: 'لا يرد', labelEn: 'No Answer', labelFr: 'Pas de Réponse', color: 'bg-orange-100 text-orange-700', icon: PhoneOff },
+  postponed: { labelAr: 'تم التأجيل', labelEn: 'Postponed', labelFr: 'Reporté', color: 'bg-gray-100 text-gray-600', icon: Clock },
+  wrong_address: { labelAr: 'عنوان خاطئ', labelEn: 'Wrong Address', labelFr: 'Mauvaise Adresse', color: 'bg-red-100 text-red-500', icon: MapPin },
+  cancelled: { labelAr: 'تم الإلغاء', labelEn: 'Cancelled', labelFr: 'Annulé', color: 'bg-red-100 text-red-600', icon: XCircle },
+  returned: { labelAr: 'تم الإرجاع', labelEn: 'Returned', labelFr: 'Retourné', color: 'bg-pink-100 text-pink-700', icon: RotateCcw },
 };
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
-  const { language } = useLocaleStore(); 
+  const { language } = useLocaleStore();
   const isAr = language === 'ar';
   const isFr = language === 'fr';
 
@@ -122,11 +122,11 @@ export default function DashboardPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface">
               <tr>
-                {['#', isAr ? 'العميل' : isFr ? 'Client' : 'Customer', 
+                {['#', isAr ? 'العميل' : isFr ? 'Client' : 'Customer',
                   isAr ? 'الهاتف' : isFr ? 'Téléphone' : 'Phone',
-                  isAr ? 'المنتجات' : isFr ? 'Articles' : 'Items', 
+                  isAr ? 'المنتجات' : isFr ? 'Articles' : 'Items',
                   isAr ? 'الإجمالي' : isFr ? 'Total' : 'Total',
-                  isAr ? 'الحالة' : isFr ? 'Statut' : 'Status', 
+                  isAr ? 'الحالة' : isFr ? 'Statut' : 'Status',
                   isAr ? 'التاريخ' : isFr ? 'Date' : 'Date'].map(h => (
                     <th key={h} className="text-start text-xs font-semibold text-muted uppercase tracking-wider px-4 py-3">
                       {h}

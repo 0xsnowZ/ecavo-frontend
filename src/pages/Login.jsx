@@ -3,7 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { authService } from '../services';
+import { GOOGLE_AUTH_URL } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
+import googleIcon from '../assets/img/google.png';
 
 export default function Login() {
   const { t, i18n } = useTranslation();
@@ -41,7 +43,7 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await authService.login(form);
-      setAuth(res.data.user, res.data.token);
+      setAuth(res.data.user);  // token lives in HTTP-only cookie, not here
       navigate(from, { replace: true });
     } catch (err) {
       const msg = err.response?.data?.message
@@ -137,11 +139,14 @@ export default function Login() {
             <div className="flex-1 h-px bg-border" />
           </div>
 
-          {/* Google (placeholder) */}
-          <button className="w-full flex items-center justify-center gap-3 border-2 border-border rounded-lg py-2.5 text-sm font-semibold text-dark hover:bg-gray-50 transition-colors">
-            <img src="/src/assets/img/google.png" alt="Google" className="w-5 h-5 object-contain" />
+          {/* Google OAuth — direct browser navigation, no XHR */}
+          <a
+            href={GOOGLE_AUTH_URL}
+            className="w-full flex items-center justify-center gap-3 border-2 border-border rounded-lg py-2.5 text-sm font-semibold text-dark hover:bg-gray-50 transition-colors"
+          >
+            <img src={googleIcon} alt="Google" className="w-5 h-5 object-contain" />
             {t('auth.google')}
-          </button>
+          </a>
 
           {/* Switch to Register */}
           <p className="text-center text-sm text-muted mt-6">
