@@ -61,7 +61,10 @@
     "reviews": "Avis",
     "description": "Description",
     "specifications": "Spécifications",
-    "related": "Produits Connexes"
+    "related": "Produits Connexes",
+    "mobiles": "Mobiles & Accessoires",
+    "appliances_section": "Appareils Électroménagers",
+    "viewed_products": "Produits Récemment Consultés"
   },
   "cart": {
     "title": "Panier",

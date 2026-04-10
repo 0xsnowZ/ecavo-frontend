@@ -17,6 +17,13 @@ const STATUS_LABEL_AR = {
   cancelled: 'ملغي', returned: 'مرتجع',
 };
 
+const STATUS_LABEL_FR = {
+  placed: 'Placé', preparing: 'En Préparation', awaiting_shipment: 'En Attente',
+  shipped: 'Expédié', in_transit: 'En Transit', delivered: 'Livré',
+  no_answer: 'Pas de Réponse', postponed: 'Reporté', wrong_address: 'Mauvaise Adresse',
+  cancelled: 'Annulé', returned: 'Retourné',
+};
+
 const STATUS_COLOR = {
   placed: 'bg-blue-100 text-blue-700', preparing: 'bg-indigo-100 text-indigo-700',
   awaiting_shipment: 'bg-yellow-100 text-yellow-700', shipped: 'bg-teal-100 text-teal-700',
@@ -28,7 +35,9 @@ const STATUS_COLOR = {
 
 export default function OrdersPage() {
   const { t, i18n } = useTranslation();
-  const { language } = useLocaleStore(); const isAr = language === 'ar';
+  const { language } = useLocaleStore(); 
+  const isAr = language === 'ar';
+  const isFr = language === 'fr';
 
   const [orders, setOrders] = useState([]);
   const [meta, setMeta] = useState({ total: 0, last_page: 1, current_page: 1 });
@@ -67,11 +76,11 @@ export default function OrdersPage() {
     setUpdating(true);
     try {
       await adminService.orders.updateStatus(editOrder.id, newStatus);
-      setUpdateSuccess(isAr ? 'تم تحديث الحالة بنجاح ✓' : 'Status updated ✓');
+      setUpdateSuccess(isAr ? 'تم تحديث الحالة بنجاح ✓' : isFr ? 'Statut mis à jour avec succès ✓' : 'Status updated ✓');
       fetchOrders();
       setTimeout(() => { setEditOrder(null); setUpdateSuccess(''); }, 1200);
     } catch {
-      alert(isAr ? 'حدث خطأ' : 'Update failed');
+      alert(isAr ? 'حدث خطأ' : isFr ? 'Échec de la mise à jour' : 'Update failed');
     } finally {
       setUpdating(false);
     }
@@ -79,7 +88,7 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-xl font-black text-secondary">{isAr ? 'إدارة الطلبات' : 'Orders Management'}</h1>
+      <h1 className="text-xl font-black text-secondary">{isAr ? 'إدارة الطلبات' : isFr ? 'Gestion des Commandes' : 'Orders Management'}</h1>
 
       {/* Filters bar */}
       <div className="card p-4 flex flex-col sm:flex-row gap-3">
@@ -88,7 +97,7 @@ export default function OrdersPage() {
           <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
           <input
             type="text"
-            placeholder={isAr ? 'بحث برقم الطلب أو الاسم أو الهاتف...' : 'Search by order#, name, phone...'}
+            placeholder={isAr ? 'بحث برقم الطلب أو الاسم أو الهاتف...' : isFr ? 'Recherche par commande#, nom, téléphone...' : 'Search by order#, name, phone...'}
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             className="input-field ps-9"
@@ -100,9 +109,9 @@ export default function OrdersPage() {
           onChange={e => { setFilter(e.target.value); setPage(1); }}
           className="input-field w-auto"
         >
-          <option value="">{isAr ? 'جميع الحالات' : 'All Statuses'}</option>
+          <option value="">{isAr ? 'جميع الحالات' : isFr ? 'Tous les Statuts' : 'All Statuses'}</option>
           {ALL_STATUSES.map(s => (
-            <option key={s} value={s}>{isAr ? STATUS_LABEL_AR[s] : s.replace(/_/g, ' ')}</option>
+            <option key={s} value={s}>{isAr ? STATUS_LABEL_AR[s] : isFr ? STATUS_LABEL_FR[s] : s.replace(/_/g, ' ')}</option>
           ))}
         </select>
         <button onClick={fetchOrders} className="btn-ghost px-3" title="Refresh">
@@ -116,9 +125,12 @@ export default function OrdersPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface">
               <tr>
-                {['#', isAr ? 'العميل' : 'Customer', isAr ? 'الهاتف' : 'Phone',
-                  isAr ? 'الإجمالي' : 'Total', isAr ? 'الحالة' : 'Status',
-                  isAr ? 'التاريخ' : 'Date', isAr ? 'إجراء' : 'Action'].map(h => (
+                {['#', isAr ? 'العميل' : isFr ? 'Client' : 'Customer', 
+                  isAr ? 'الهاتف' : isFr ? 'Téléphone' : 'Phone',
+                  isAr ? 'الإجمالي' : isFr ? 'Total' : 'Total', 
+                  isAr ? 'الحالة' : isFr ? 'Statut' : 'Status',
+                  isAr ? 'التاريخ' : isFr ? 'Date' : 'Date', 
+                  isAr ? 'إجراء' : isFr ? 'Actions' : 'Action'].map(h => (
                     <th key={h} className="text-start px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">
                       {h}
                     </th>
@@ -130,7 +142,7 @@ export default function OrdersPage() {
                 <tr><td colSpan={7} className="py-12 text-center"><Spinner /></td></tr>
               ) : orders.length === 0 ? (
                 <tr><td colSpan={7} className="py-12 text-center text-muted text-sm">
-                  {isAr ? 'لا توجد طلبات' : 'No orders found'}
+                  {isAr ? 'لا توجد طلبات' : isFr ? 'Aucune commande' : 'No orders found'}
                 </td></tr>
               ) : orders.map(order => (
                 <tr key={order.id} className="hover:bg-surface/60 transition-colors">
@@ -140,7 +152,7 @@ export default function OrdersPage() {
                   <td className="px-4 py-3 font-bold text-primary">${parseFloat(order.total).toFixed(2)}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${STATUS_COLOR[order.status] || 'bg-gray-100 text-gray-600'}`}>
-                      {isAr ? STATUS_LABEL_AR[order.status] : order.status.replace(/_/g, ' ')}
+                      {isAr ? STATUS_LABEL_AR[order.status] : isFr ? STATUS_LABEL_FR[order.status] : order.status.replace(/_/g, ' ')}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-muted text-xs whitespace-nowrap">
@@ -152,7 +164,7 @@ export default function OrdersPage() {
                       className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
                     >
                       <ChevronDown size={14} />
-                      {isAr ? 'تغيير الحالة' : 'Update Status'}
+                      {isAr ? 'تغيير الحالة' : isFr ? 'Mettre à jour' : 'Update Status'}
                     </button>
                   </td>
                 </tr>
@@ -164,7 +176,7 @@ export default function OrdersPage() {
         {/* Pagination */}
         {meta.last_page > 1 && (
           <div className="px-4 py-3 border-t border-border flex items-center justify-between text-xs text-muted">
-            <span>{isAr ? `${meta.total} طلب` : `${meta.total} orders`}</span>
+            <span>{isAr ? `${meta.total} طلب` : isFr ? `${meta.total} commandes` : `${meta.total} orders`}</span>
             <div className="flex items-center gap-1">
               {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(p => (
                 <button key={p} onClick={() => setPage(p)}
@@ -184,7 +196,7 @@ export default function OrdersPage() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-slide-down">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-secondary">
-                {isAr ? `تحديث طلب #${editOrder.id}` : `Update Order #${editOrder.id}`}
+                {isAr ? `تحديث طلب #${editOrder.id}` : isFr ? `Mettre à jour la commande #${editOrder.id}` : `Update Order #${editOrder.id}`}
               </h3>
               <button onClick={() => setEditOrder(null)} className="text-muted hover:text-dark">
                 <X size={20} />
@@ -192,11 +204,11 @@ export default function OrdersPage() {
             </div>
 
             <p className="text-xs text-muted mb-3">
-              {isAr ? `العميل: ${editOrder.guest_name || '—'}` : `Customer: ${editOrder.guest_name || '—'}`}
+              {isAr ? `العميل: ${editOrder.guest_name || '—'}` : isFr ? `Client: ${editOrder.guest_name || '—'}` : `Customer: ${editOrder.guest_name || '—'}`}
             </p>
 
             <label className="block text-sm font-semibold text-dark mb-2">
-              {isAr ? 'الحالة الجديدة' : 'New Status'}
+              {isAr ? 'الحالة الجديدة' : isFr ? 'Nouveau Statut' : 'New Status'}
             </label>
             <select
               value={newStatus}
@@ -205,7 +217,7 @@ export default function OrdersPage() {
             >
               {ALL_STATUSES.map(s => (
                 <option key={s} value={s}>
-                  {isAr ? STATUS_LABEL_AR[s] : s.replace(/_/g, ' ')}
+                  {isAr ? STATUS_LABEL_AR[s] : isFr ? STATUS_LABEL_FR[s] : s.replace(/_/g, ' ')}
                 </option>
               ))}
             </select>
@@ -216,10 +228,10 @@ export default function OrdersPage() {
 
             <div className="flex gap-3">
               <button onClick={handleStatusUpdate} disabled={updating} className="btn-primary flex-1 justify-center">
-                {updating ? <Loader2 size={16} className="animate-spin" /> : (isAr ? 'تحديث' : 'Update')}
+                {updating ? <Loader2 size={16} className="animate-spin" /> : (isAr ? 'تحديث' : isFr ? 'Mettre à jour' : 'Update')}
               </button>
               <button onClick={() => setEditOrder(null)} className="btn-ghost flex-1 justify-center">
-                {isAr ? 'إلغاء' : 'Cancel'}
+                {isAr ? 'إلغاء' : isFr ? 'Annuler' : 'Cancel'}
               </button>
             </div>
           </div>

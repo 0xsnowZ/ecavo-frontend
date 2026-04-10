@@ -12,6 +12,7 @@ export default function ProductCard({ product, showCountdown = false }) {
   const { t, i18n } = useTranslation();
   const { currency } = useLocaleStore();
   const addItem = useCartStore((s) => s.addItem);
+  const items = useCartStore((s) => s.items);
   const { toggle, isInWishlist } = useWishlistStore();
 
   // Pages normalize API data to camelCase; raw API uses snake_case — support both
@@ -33,6 +34,7 @@ export default function ProductCard({ product, showCountdown = false }) {
     ? `${currency.symbol}${(originalPrice * currency.rate).toFixed(2)}`
     : null;
   const wishlisted = isInWishlist(id);
+  const qtyInCart = items.find((i) => i.product.id === id)?.qty || 0;
 
   return (
     <div className="card group relative overflow-hidden flex flex-col">
@@ -95,26 +97,31 @@ export default function ProductCard({ product, showCountdown = false }) {
 
         <StarRating rating={avgRating} count={reviewCount} />
 
-        <div className="flex items-center gap-2 mt-auto">
-          <span className="text-lg font-bold text-primary">{displayPrice}</span>
-          {displayOriginal && (
-            <del className="text-xs text-muted">{displayOriginal}</del>
-          )}
+        <div className="flex items-center justify-between mt-auto pt-2">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-dark">{displayPrice}</span>
+            {displayOriginal && (
+              <del className="text-xs text-muted">{displayOriginal}</del>
+            )}
+          </div>
+          
+          <button
+            onClick={(e) => { e.preventDefault(); addItem(product); }}
+            className="w-8 h-8 rounded-full border border-dark flex items-center justify-center text-dark hover:bg-dark hover:text-white transition-colors relative flex-shrink-0"
+            aria-label={t('products.add_to_cart')}
+          >
+            <ShoppingCart size={16} />
+            {qtyInCart > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-[#FF6600] text-white text-[10px] w-[18px] h-[18px] rounded-full flex items-center justify-center font-bold border border-white">
+                {qtyInCart}
+              </span>
+            )}
+          </button>
         </div>
 
         {showCountdown && dealEndsAt && (
           <CountdownTimer targetDate={dealEndsAt} />
         )}
-
-        {/* Add to Cart */}
-        <button
-          onClick={() => addItem(product)}
-          className="btn-primary w-full justify-center mt-2 py-2 text-sm opacity-0 group-hover:opacity-100
-                     transform translate-y-2 group-hover:translate-y-0 transition-all duration-300"
-        >
-          <ShoppingCart size={16} />
-          {t('products.add_to_cart')}
-        </button>
       </div>
     </div>
   );

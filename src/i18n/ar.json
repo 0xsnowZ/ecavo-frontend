@@ -61,7 +61,10 @@
     "reviews": "تقييمات",
     "description": "الوصف",
     "specifications": "المواصفات",
-    "related": "منتجات مشابهة"
+    "related": "منتجات مشابهة",
+    "mobiles": "الموبايلات واكسسواراتها",
+    "appliances_section": "الأجهزة الكهربائية",
+    "viewed_products": "المنتجات التي تمت مشاهدتها"
   },
   "cart": {
     "title": "سلة التسوق",

@@ -61,7 +61,10 @@
     "reviews": "Reviews",
     "description": "Description",
     "specifications": "Specifications",
-    "related": "Related Products"
+    "related": "Related Products",
+    "mobiles": "Mobiles & Accessories",
+    "appliances_section": "Electrical Appliances",
+    "viewed_products": "Recently Viewed Products"
   },
   "cart": {
     "title": "Shopping Cart",

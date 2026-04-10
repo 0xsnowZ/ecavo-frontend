@@ -24,36 +24,41 @@ import banner3 from '../assets/img/banner-3.jpg';
 import banner4 from '../assets/img/banner-4.jpg';
 import banner5 from '../assets/img/banner-5.jpg';
 import bannerSm1 from '../assets/img/banner-sm-1.jpg';
+import bannerSm2 from '../assets/img/banner-sm-2.jpg';
+import bannerSm3 from '../assets/img/banner-sm-3.jpg';
+import banner6 from '../assets/img/banner-6.jpg';
+import banner7 from '../assets/img/banner-7.jpg';
+import banner8 from '../assets/img/banner-8.jpg';
 
 // Sidebar — matches the 10 seeded categories
 const SIDEBAR_CATEGORIES = [
   { labelKey: 'sidebar.home_appliances', slug: 'appliances' },
-  { labelKey: 'sidebar.toys',            slug: 'toys' },
-  { labelKey: 'sidebar.chargers',        slug: 'accessories' },
-  { labelKey: 'sidebar.furniture',       slug: 'furniture' },
-  { labelKey: 'sidebar.phones',          slug: 'mobiles' },
-  { labelKey: 'sidebar.clothes',         slug: 'clothes' },
-  { labelKey: 'sidebar.shoes',           slug: 'shoes' },
-  { labelKey: 'sidebar.accessories',     slug: 'accessories' },
-  { labelKey: 'sidebar.beauty',          slug: 'beauty' },
-  { labelKey: 'sidebar.tvs',             slug: 'tvs' },
+  { labelKey: 'sidebar.toys', slug: 'toys' },
+  { labelKey: 'sidebar.chargers', slug: 'accessories' },
+  { labelKey: 'sidebar.furniture', slug: 'furniture' },
+  { labelKey: 'sidebar.phones', slug: 'mobiles' },
+  { labelKey: 'sidebar.clothes', slug: 'clothes' },
+  { labelKey: 'sidebar.shoes', slug: 'shoes' },
+  { labelKey: 'sidebar.accessories', slug: 'accessories' },
+  { labelKey: 'sidebar.beauty', slug: 'beauty' },
+  { labelKey: 'sidebar.tvs', slug: 'tvs' },
 ];
 
 /** Map a raw API product to the shape ProductCard expects */
 function toCard(p) {
   return {
-    id:              p.id,
-    slug:            p.slug,
-    name_ar:         p.name_ar,
-    name_en:         p.name_en,
-    name_fr:         p.name_fr,
-    price:           parseFloat(p.price),
-    originalPrice:   p.original_price  ? parseFloat(p.original_price)  : null,
+    id: p.id,
+    slug: p.slug,
+    name_ar: p.name_ar,
+    name_en: p.name_en,
+    name_fr: p.name_fr,
+    price: parseFloat(p.price),
+    originalPrice: p.original_price ? parseFloat(p.original_price) : null,
     discountPercent: p.discount_percent ?? null,
-    images:          resolveImages(p.images),
-    rating:          parseFloat(p.avg_rating) || 0,
-    reviewCount:     p.review_count || 0,
-    dealEndsAt:      p.deal_ends_at || null,
+    images: resolveImages(p.images),
+    rating: parseFloat(p.avg_rating) || 0,
+    reviewCount: p.review_count || 0,
+    dealEndsAt: p.deal_ends_at || null,
   };
 }
 
@@ -73,9 +78,9 @@ function ProductCarousel({ products, loading, slidesPerView = { base: 2, sm: 3, 
         spaceBetween={14}
         slidesPerView={slidesPerView.base}
         breakpoints={{
-          640:  { slidesPerView: slidesPerView.sm  ?? 3 },
-          1024: { slidesPerView: slidesPerView.lg  ?? 4 },
-          1280: { slidesPerView: slidesPerView.xl  ?? 5 },
+          640: { slidesPerView: slidesPerView.sm ?? 3 },
+          1024: { slidesPerView: slidesPerView.lg ?? 4 },
+          1280: { slidesPerView: slidesPerView.xl ?? 5 },
         }}
         navigation
         autoplay={{ delay: 5000, disableOnInteraction: false }}
@@ -95,18 +100,24 @@ export default function Home() {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
 
-  const [deals,       setDeals]       = useState([]);
-  const [sale,        setSale]        = useState([]);
+  const [deals, setDeals] = useState([]);
+  const [sale, setSale] = useState([]);
   const [electronics, setElectronics] = useState([]);
-  const [loadingDeals,   setLoadingDeals]   = useState(true);
-  const [loadingSale,    setLoadingSale]    = useState(true);
-  const [loadingElec,    setLoadingElec]    = useState(true);
+  const [mobiles, setMobiles] = useState([]);
+  const [appliances, setAppliances] = useState([]);
+  const [viewed, setViewed] = useState([]);
+  const [loadingDeals, setLoadingDeals] = useState(true);
+  const [loadingSale, setLoadingSale] = useState(true);
+  const [loadingElec, setLoadingElec] = useState(true);
+  const [loadingMobiles, setLoadingMobiles] = useState(true);
+  const [loadingAppliances, setLoadingAppliances] = useState(true);
+  const [loadingViewed, setLoadingViewed] = useState(true);
 
   // Featured deals — products with deal_ends_at set
   useEffect(() => {
     productsService.list({ sort: 'discount', per_page: 8, is_featured: 1 })
       .then(r => setDeals((r.data.data || []).map(p => toCard(p))))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingDeals(false));
   }, [isAr]);
 
@@ -114,7 +125,7 @@ export default function Home() {
   useEffect(() => {
     productsService.list({ sort: 'discount', per_page: 10 })
       .then(r => setSale((r.data.data || []).map(p => toCard(p))))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingSale(false));
   }, [isAr]);
 
@@ -126,8 +137,32 @@ export default function Home() {
         return productsService.list({ sort: 'latest', per_page: 6, category: 'appliances' })
           .then(r2 => setElectronics([...(r2.data.data || []), ...tvs].map(p => toCard(p))));
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingElec(false));
+  }, [isAr]);
+
+  // Mobiles section
+  useEffect(() => {
+    productsService.list({ sort: 'latest', per_page: 6, category: 'mobiles' })
+      .then(r => setMobiles((r.data.data || []).map(p => toCard(p))))
+      .catch(() => { })
+      .finally(() => setLoadingMobiles(false));
+  }, [isAr]);
+
+  // Appliances section
+  useEffect(() => {
+    productsService.list({ sort: 'latest', per_page: 6, category: 'appliances' })
+      .then(r => setAppliances((r.data.data || []).map(p => toCard(p))))
+      .catch(() => { })
+      .finally(() => setLoadingAppliances(false));
+  }, [isAr]);
+
+  // Viewed products section
+  useEffect(() => {
+    productsService.list({ sort: 'latest', per_page: 10 })
+      .then(r => setViewed((r.data.data || []).map(p => toCard(p))))
+      .catch(() => { })
+      .finally(() => setLoadingViewed(false));
   }, [isAr]);
 
   return (
@@ -221,8 +256,8 @@ export default function Home() {
       <section className="container-main py-6">
         <SectionTitle title={t('products.electronics')} />
         <div className="flex gap-4 mt-4">
-          {/* Side banner — unchanged */}
-          <Link to="/categories/appliances" className="hidden lg:block w-48 shrink-0 rounded-xl overflow-hidden">
+          {/* Side banner */}
+          <Link to="/categories/appliances" className="hidden lg:flex w-1/5 shrink-0 rounded-md overflow-hidden border border-gray-100">
             <img
               src={bannerSm1}
               alt="electronics"
@@ -239,6 +274,75 @@ export default function Home() {
             />
           </div>
         </div>
+      </section>
+
+      {/* Mobiles & Accessories section with side banner ON RIGHT */}
+      <section className="container-main py-6">
+        <SectionTitle title={t('products.mobiles')} />
+        <div className="flex gap-4 mt-4">
+          <div className="flex-1 min-w-0">
+            <ProductCarousel
+              products={mobiles}
+              loading={loadingMobiles}
+              slidesPerView={{ base: 2, sm: 3, lg: 4, xl: 4 }}
+            />
+          </div>
+          <Link to="/categories/mobiles" className="hidden lg:flex w-1/5 shrink-0 rounded-md overflow-hidden border border-gray-100">
+            <img
+              src={bannerSm2}
+              alt="mobiles"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+            />
+          </Link>
+        </div>
+      </section>
+
+      {/* Appliances section with side banner ON LEFT */}
+      <section className="container-main py-6">
+        <SectionTitle title={t('products.appliances_section')} />
+        <div className="flex gap-4 mt-4">
+          <Link to="/categories/appliances" className="hidden lg:flex w-1/5 shrink-0 rounded-md overflow-hidden border border-gray-100">
+            <img
+              src={bannerSm3}
+              alt="appliances"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+            />
+          </Link>
+          <div className="flex-1 min-w-0">
+            <ProductCarousel
+              products={appliances}
+              loading={loadingAppliances}
+              slidesPerView={{ base: 2, sm: 3, lg: 4, xl: 4 }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Banner row 3 */}
+      <section className="container-main py-4">
+        <BannerGrid
+          cols={3}
+          banners={[
+            { src: banner6, to: '/products' },
+            { src: banner7, to: '/products' },
+            { src: banner8, to: '/products' },
+          ]}
+        />
+      </section>
+
+      {/* Viewed Products */}
+      <section className="container-main py-6">
+        <div className="flex items-center justify-between mb-4">
+          <SectionTitle title={t('products.viewed_products')} />
+          <Link to="/products?sort=latest" className="text-sm text-primary hover:underline flex items-center gap-1">
+            {t('products.view_all')} <ChevronRight size={14} className="rtl-flip" />
+          </Link>
+        </div>
+        <ProductCarousel
+          products={viewed}
+          loading={loadingViewed}
+          slidesPerView={{ base: 2, sm: 3, lg: 4, xl: 5 }}
+        />
       </section>
     </div>
   );

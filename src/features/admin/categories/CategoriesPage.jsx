@@ -10,7 +10,9 @@ const EMPTY_FORM = { name_ar: '', name_en: '', name_fr: '', parent_id: '', sort_
 
 export default function CategoriesPage() {
   const { t, i18n } = useTranslation();
-  const { language } = useLocaleStore(); const isAr = language === 'ar';
+  const { language } = useLocaleStore(); 
+  const isAr = language === 'ar';
+  const isFr = language === 'fr';
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,11 +96,11 @@ export default function CategoriesPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-black text-secondary">{isAr ? 'إدارة الأقسام' : 'Categories Management'}</h1>
+        <h1 className="text-xl font-black text-secondary">{isAr ? 'إدارة الأقسام' : isFr ? 'Gestion des Catégories' : 'Categories Management'}</h1>
         <div className="flex gap-2">
           <button onClick={fetchCategories} className="btn-ghost text-sm"><RefreshCw size={16} /></button>
           <button onClick={openCreate} className="btn-primary text-sm">
-            <Plus size={16} /> {isAr ? 'إضافة قسم' : 'Add Category'}
+            <Plus size={16} /> {isAr ? 'إضافة قسم' : isFr ? 'Ajouter une Catégorie' : 'Add Category'}
           </button>
         </div>
       </div>
@@ -108,8 +110,12 @@ export default function CategoriesPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface">
               <tr>
-                {[isAr ? 'القسم' : 'Category', isAr ? 'الرابط' : 'Slug', isAr ? 'الترتيب' : 'Order',
-                isAr ? 'الحالة' : 'Status', isAr ? 'المنتجات' : 'Products', isAr ? 'إجراء' : 'Actions'].map(h => (
+                {[isAr ? 'القسم' : isFr ? 'Catégorie' : 'Category', 
+                  isAr ? 'الرابط' : isFr ? 'Lien' : 'Slug', 
+                  isAr ? 'الترتيب' : isFr ? 'Ordre' : 'Order',
+                  isAr ? 'الحالة' : isFr ? 'Statut' : 'Status', 
+                  isAr ? 'المنتجات' : isFr ? 'Produits' : 'Products', 
+                  isAr ? 'إجراء' : isFr ? 'Actions' : 'Actions'].map(h => (
                   <th key={h} className="text-start px-4 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
                     {h}
                   </th>
@@ -121,7 +127,7 @@ export default function CategoriesPage() {
                 <tr><td colSpan={6} className="py-12 text-center"><Spinner /></td></tr>
               ) : flatCategories.length === 0 ? (
                 <tr><td colSpan={6} className="py-12 text-center text-muted">
-                  {isAr ? 'لا توجد أقسام' : 'No categories'}
+                  {isAr ? 'لا توجد أقسام' : isFr ? 'Aucune catégorie' : 'No categories'}
                 </td></tr>
               ) : flatCategories.map(cat => (
                 <tr key={cat.id} className="hover:bg-surface/60 transition-colors">
@@ -143,12 +149,12 @@ export default function CategoriesPage() {
                   <td className="px-4 py-3 text-muted">{cat.sort_order}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cat.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {cat.is_active ? (isAr ? 'نشط' : 'Active') : (isAr ? 'غير نشط' : 'Inactive')}
+                      {cat.is_active ? (isAr ? 'نشط' : isFr ? 'Actif' : 'Active') : (isAr ? 'غير نشط' : isFr ? 'Inactif' : 'Inactive')}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-muted">
                     {cat.children?.length > 0
-                      ? `${cat.children.length} ${isAr ? 'قسم فرعي' : 'subs'}`
+                      ? `${cat.children.length} ${isAr ? 'قسم فرعي' : isFr ? 'sous-catégories' : 'subs'}`
                       : '—'}
                   </td>
                   <td className="px-4 py-3">

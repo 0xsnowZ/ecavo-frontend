@@ -20,16 +20,21 @@ export default function Header({ onCartOpen }) {
         <TopBar />
 
         {/* Info bar: Logo + Search + Cart */}
-        <div className="container-main py-3 flex items-center gap-4">
+        <div className="container-main py-3 flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="text-3xl font-black text-secondary shrink-0">
-            E<span className="text-primary">CAVO</span>
-          </Link>
+          <div className="flex flex-1">
+            <Link to="/" className="text-3xl font-black text-secondary shrink-0">
+              E<span className="text-primary">CAVO</span>
+            </Link>
+          </div>
 
-          <SearchBar />
+          {/* SearchBar */}
+          <div className="flex-[2] flex justify-center w-full">
+            <SearchBar />
+          </div>
 
           {/* Cart */}
-          <div className="ms-auto shrink-0">
+          <div className="flex flex-1 justify-end shrink-0">
             <CartIcon onOpen={onCartOpen} />
           </div>
         </div>

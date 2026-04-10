@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, ShoppingCart, Package, Tag,
-  Store, Bell, LogOut, Moon, Sun, Languages, ChevronDown,
+  Store, Bell, LogOut, Moon, Sun,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
@@ -18,27 +18,25 @@ const adminLinks = [
 ];
 
 const PAGE_TITLES = {
-  '/admin':            { ar: 'لوحة التحكم',    en: 'Dashboard' },
-  '/admin/orders':     { ar: 'إدارة الطلبات',  en: 'Orders' },
-  '/admin/products':   { ar: 'إدارة المنتجات', en: 'Products' },
-  '/admin/categories': { ar: 'إدارة الأقسام',  en: 'Categories' },
+  '/admin':            { ar: 'لوحة التحكم',    en: 'Dashboard', fr: 'Tableau de Bord' },
+  '/admin/orders':     { ar: 'إدارة الطلبات',  en: 'Orders', fr: 'Commandes' },
+  '/admin/products':   { ar: 'إدارة المنتجات', en: 'Products', fr: 'Produits' },
+  '/admin/categories': { ar: 'إدارة الأقسام',  en: 'Categories', fr: 'Catégories' },
 };
 
 export default function AdminLayout() {
   const { t, i18n }                          = useTranslation();
   const { user, logout }                     = useAuthStore();
   const { dark, toggle }                     = useThemeStore();
-  const { language, setLanguage, languages } = useLocaleStore();
+  const { language } = useLocaleStore();
   const navigate  = useNavigate();
   const location  = useLocation();
   const isAr      = language === 'ar';
 
-  const [langOpen, setLangOpen] = useState(false);
-
   const handleLogout = () => { logout(); navigate('/login'); };
 
   const pageTitle = PAGE_TITLES[location.pathname];
-  const titleText = pageTitle ? (isAr ? pageTitle.ar : pageTitle.en) : '';
+  const titleText = pageTitle ? (pageTitle[language] || pageTitle.en) : '';
 
   /* ── Colour tokens ────────────────────────────────────────
      All surfaces are expressed as dark:/light: Tailwind pairs.
@@ -158,45 +156,6 @@ export default function AdminLayout() {
 
           <div className="flex items-center gap-2">
 
-            {/* Language switcher */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setLangOpen(o => !o)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium
-                           text-gray-600 dark:text-gray-300
-                           border border-gray-200 dark:border-gray-700
-                           hover:bg-gray-100 dark:hover:bg-gray-800
-                           hover:text-gray-900 dark:hover:text-white transition-all"
-              >
-                <Languages size={16} />
-                <span>{isAr ? 'العربية' : 'English'}</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 ${langOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {langOpen && (
-                <div className="absolute end-0 top-full mt-1 min-w-[130px] z-50 rounded-xl overflow-hidden
-                                bg-white dark:bg-gray-800
-                                border border-gray-200 dark:border-gray-700
-                                shadow-lg">
-                  {languages.map(lang => (
-                    <button
-                      key={lang.code}
-                      type="button"
-                      onClick={() => { setLanguage(lang.code); setLangOpen(false); }}
-                      className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm text-start transition-colors
-                                  ${language === lang.code
-                                    ? 'bg-primary/10 text-primary font-semibold'
-                                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                  }`}
-                    >
-                      <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
 
             {/* Bell */}
             <button
@@ -216,9 +175,6 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
-
-      {/* Close lang dropdown on outside click */}
-      {langOpen && <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />}
     </div>
   );
 }
