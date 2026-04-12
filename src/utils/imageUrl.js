@@ -13,7 +13,7 @@ const API_ORIGIN = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://
 export function resolveImageUrl(url, fallback = '/placeholder-product.png') {
   if (!url) return fallback;
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  if (url.startsWith('/storage/')) return `${API_ORIGIN}${url}`;
+  if (url.startsWith('/storage/') || url.startsWith('/images/')) return `${API_ORIGIN}${url}`;
   return url;
 }
 
