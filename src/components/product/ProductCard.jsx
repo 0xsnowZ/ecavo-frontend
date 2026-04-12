@@ -7,6 +7,7 @@ import { useLocaleStore } from '../../store/useLocaleStore';
 import { useTranslation } from 'react-i18next';
 import CountdownTimer from '../ui/CountdownTimer';
 import { getLocalized } from '../../utils/localize';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 export default function ProductCard({ product, showCountdown = false }) {
   const { t, i18n } = useTranslation();
@@ -69,7 +70,7 @@ export default function ProductCard({ product, showCountdown = false }) {
         className="product-img-wrapper h-[240px] w-full shrink-0 flex-none bg-white flex items-center justify-center overflow-hidden"
       >
         <img
-          src={images?.[0]}
+          src={resolveImageUrl(images?.[0])}
           alt={name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"

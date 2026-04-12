@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Upload, X, Image, Loader2, GripVertical, Star } from 'lucide-react';
 import { adminService } from '../../services';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 /**
  * ImageUploader
@@ -100,7 +101,7 @@ export default function ImageUploader({ images = [], onChange, max = 8 }) {
                 ${i === 0 ? 'border-primary' : 'border-transparent hover:border-gray-300'}`}
             >
               <img
-                src={url}
+                src={resolveImageUrl(url)}
                 alt={`product-${i}`}
                 className="w-full h-full object-contain p-2"
               />
