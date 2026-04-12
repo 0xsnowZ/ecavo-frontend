@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -21,6 +21,31 @@ export default function Login() {
   const [apiError, setApiError] = useState('');
 
   const from = location.state?.from || '/';
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    
+    // Handle OAuth Token Redirection
+    if (token) {
+      setLoading(true);
+      authService.tokenLogin({ token })
+        .then(res => {
+          setAuth(res.data.user);
+          navigate(from, { replace: true });
+        })
+        .catch(() => {
+          setLoading(false);
+          setApiError(isAr ? 'فشل تسجيل الدخول عبر المزامنة، يرجى المحاولة مرة أخرى.' : 'Token sync failed, please try again.');
+        });
+      // Clear token from URL immediately so it doesn't stay in history
+      window.history.replaceState({}, document.title, location.pathname);
+    }
+    
+    if (params.get('error') === 'oauth_failed') {
+      setApiError(isAr ? 'فشل تسجيل الدخول عبر جوجل، يرجى المحاولة مرة أخرى.' : 'Google login failed, please try again.');
+    }
+  }, [location.search, isAr, navigate, from, setAuth]);
 
   const set = (k, v) => {
     setForm(f => ({ ...f, [k]: v }));
@@ -124,9 +149,9 @@ export default function Login() {
 
             {/* Submit */}
             <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full justify-center py-3 text-base mt-2"
+               type="submit"
+               disabled={loading}
+               className="btn-primary w-full justify-center py-3 text-base mt-2"
             >
               {loading ? <Loader2 size={20} className="animate-spin" /> : t('auth.login')}
             </button>
