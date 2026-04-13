@@ -10,6 +10,8 @@ import {
   LogOut,
   Moon,
   Sun,
+  Menu,
+  X as XIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
@@ -49,6 +51,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const isAr = language === "ar";
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -66,12 +69,24 @@ export default function AdminLayout() {
     <div
       className={`${dark ? "dark" : ""} flex min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300`}
     >
+      {/* ── Mobile overlay ──────────────────────────────────────── */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* ── Sidebar ──────────────────────────────────────── */}
       <aside
-        className="w-64 shrink-0 flex flex-col fixed h-full z-30
-                        bg-white dark:bg-gray-900
-                        border-e border-gray-200 dark:border-gray-800
-                        transition-colors duration-300"
+        className={`
+          w-64 shrink-0 flex flex-col fixed h-full z-40
+          bg-white dark:bg-gray-900
+          border-e border-gray-200 dark:border-gray-800
+          transition-all duration-300
+          lg:translate-x-0
+          ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
       >
         {/* Logo */}
         <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-800">
@@ -184,7 +199,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* ── Main area ─────────────────────────────────────── */}
-      <div className="flex-1 ms-64 flex flex-col">
+      <div className="flex-1 lg:ms-64 flex flex-col w-full">
         {/* Top bar */}
         <header
           className="sticky top-0 z-20 flex items-center justify-between px-6 py-3
@@ -192,6 +207,17 @@ export default function AdminLayout() {
                            border-b border-gray-200 dark:border-gray-800
                            transition-colors duration-300"
         >
+          {/* Mobile menu toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-xl text-gray-500 dark:text-gray-400
+                       hover:bg-gray-100 dark:hover:bg-gray-800
+                       hover:text-gray-900 dark:hover:text-white transition-all"
+          >
+            {mobileMenuOpen ? <XIcon size={20} /> : <Menu size={20} />}
+          </button>
+
           <h1 className="text-base font-bold text-gray-900 dark:text-white">
             {titleText}
           </h1>
