@@ -536,7 +536,7 @@ export default function ProductsPage() {
                           onChange={(e) => setField(key, e.target.checked)}
                           className="w-4 h-4 accent-primary"
                         />
-                        <span className="text-sm text-dark">
+                        <span className="text-sm text-dark dark:text-gray-100">
                           {isAr ? labelAr : labelEn}
                         </span>
                       </label>
@@ -576,7 +576,7 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="sticky bottom-0 bg-white border-t border-border px-6 py-4 flex gap-3">
+                <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-border dark:border-gray-700 px-6 py-4 flex gap-3">
                   <button
                     onClick={handleSave}
                     disabled={saving}
@@ -604,12 +604,12 @@ export default function ProductsPage() {
           {/* Delete confirmation */}
           {deleting && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center space-y-4 animate-fade-in">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 animate-fade-in">
                 <p className="text-2xl">🗑️</p>
-                <p className="font-bold text-secondary">
+                <p className="font-bold text-secondary dark:text-white">
                   {isAr ? "هل أنت متأكد من الحذف؟" : "Confirm Delete?"}
                 </p>
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted dark:text-gray-400">
                   {isAr
                     ? "لا يمكن التراجع عن هذا الإجراء."
                     : "This action cannot be undone."}

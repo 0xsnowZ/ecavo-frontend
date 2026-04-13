@@ -407,7 +407,7 @@ export default function CategoriesPage() {
                           }
                           className="w-4 h-4 accent-primary"
                         />
-                        <span className="text-sm text-dark">
+                        <span className="text-sm text-dark dark:text-gray-100">
                           {isAr ? "نشط" : "Active"}
                         </span>
                       </label>
@@ -415,7 +415,7 @@ export default function CategoriesPage() {
                   </div>
                 </div>
 
-                <div className="border-t border-border px-6 py-4 flex gap-3">
+                <div className="border-t border-border dark:border-gray-700 bg-white dark:bg-gray-800 px-6 py-4 flex gap-3">
                   <button
                     onClick={handleSave}
                     disabled={saving}

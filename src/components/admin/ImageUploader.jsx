@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback } from 'react';
-import { Upload, X, Image, Loader2, GripVertical, Star } from 'lucide-react';
-import { adminService } from '../../services';
-import { resolveImageUrl } from '../../utils/imageUrl';
+import { useState, useRef, useCallback } from "react";
+import { Upload, X, Image, Loader2, GripVertical, Star } from "lucide-react";
+import { adminService } from "../../services";
+import { resolveImageUrl } from "../../utils/imageUrl";
 
 /**
  * ImageUploader
@@ -13,65 +13,81 @@ import { resolveImageUrl } from '../../utils/imageUrl';
  */
 export default function ImageUploader({ images = [], onChange, max = 8 }) {
   const [draggingOver, setDraggingOver] = useState(false);
-  const [uploads, setUploads]           = useState({}); // { tempId: { progress, error } }
+  const [uploads, setUploads] = useState({}); // { tempId: { progress, error } }
   const fileRef = useRef(null);
 
   // ── Upload a File object ──────────────────────────────────────────────────
-  const uploadFile = useCallback(async (file) => {
-    const tempId = `uploading-${Date.now()}-${Math.random()}`;
+  const uploadFile = useCallback(
+    async (file) => {
+      const tempId = `uploading-${Date.now()}-${Math.random()}`;
 
-    // Validate client-side
-    if (!file.type.startsWith('image/')) {
-      alert('يُسمح بالصور فقط / Images only');
-      return;
-    }
-    if (file.size > 4 * 1024 * 1024) {
-      alert('الحد الأقصى 4MB / Max 4MB');
-      return;
-    }
+      // Validate client-side
+      if (!file.type.startsWith("image/")) {
+        alert("يُسمح بالصور فقط / Images only");
+        return;
+      }
+      if (file.size > 4 * 1024 * 1024) {
+        alert("الحد الأقصى 4MB / Max 4MB");
+        return;
+      }
 
-    setUploads(u => ({ ...u, [tempId]: { progress: true, error: null } }));
+      setUploads((u) => ({ ...u, [tempId]: { progress: true, error: null } }));
 
-    try {
-      const res = await adminService.uploadImage(file);
-      const url = res.data.url;
-      onChange([...images, url]);
-    } catch (err) {
-      const msg = err.response?.data?.message || 'فشل الرفع / Upload failed';
-      setUploads(u => ({ ...u, [tempId]: { progress: false, error: msg } }));
-      setTimeout(() => setUploads(u => {
+      try {
+        const res = await adminService.uploadImage(file);
+        const url = res.data.url;
+        onChange([...images, url]);
+      } catch (err) {
+        const msg = err.response?.data?.message || "فشل الرفع / Upload failed";
+        setUploads((u) => ({
+          ...u,
+          [tempId]: { progress: false, error: msg },
+        }));
+        setTimeout(
+          () =>
+            setUploads((u) => {
+              const copy = { ...u };
+              delete copy[tempId];
+              return copy;
+            }),
+          3000,
+        );
+        return;
+      }
+
+      setUploads((u) => {
         const copy = { ...u };
         delete copy[tempId];
         return copy;
-      }), 3000);
-      return;
-    }
-
-    setUploads(u => {
-      const copy = { ...u };
-      delete copy[tempId];
-      return copy;
-    });
-  }, [images, onChange]);
+      });
+    },
+    [images, onChange],
+  );
 
   // ── Process selected files ────────────────────────────────────────────────
-  const handleFiles = useCallback((files) => {
-    const remaining = max - images.length;
-    Array.from(files).slice(0, remaining).forEach(uploadFile);
-  }, [max, images.length, uploadFile]);
+  const handleFiles = useCallback(
+    (files) => {
+      const remaining = max - images.length;
+      Array.from(files).slice(0, remaining).forEach(uploadFile);
+    },
+    [max, images.length, uploadFile],
+  );
 
   // ── Drag & Drop handlers ──────────────────────────────────────────────────
-  const onDrop = useCallback((e) => {
-    e.preventDefault();
-    setDraggingOver(false);
-    if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
-  }, [handleFiles]);
+  const onDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      setDraggingOver(false);
+      if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+    },
+    [handleFiles],
+  );
 
   // ── Remove image ──────────────────────────────────────────────────────────
   const removeImage = async (url, index) => {
     // Extract storage path from URL (the part after /storage/)
     try {
-      const path = url.split('/storage/')[1];
+      const path = url.split("/storage/")[1];
       if (path) await adminService.deleteImage(path);
     } catch {
       // Non-fatal — image URL is already removed from list
@@ -86,7 +102,7 @@ export default function ImageUploader({ images = [], onChange, max = 8 }) {
     onChange(reordered);
   };
 
-  const isUploading = Object.values(uploads).some(u => u.progress);
+  const isUploading = Object.values(uploads).some((u) => u.progress);
   const canUploadMore = images.length < max;
 
   return (
@@ -98,7 +114,7 @@ export default function ImageUploader({ images = [], onChange, max = 8 }) {
             <div
               key={url}
               className={`relative group rounded-xl overflow-hidden bg-gray-50 border-2 aspect-square
-                ${i === 0 ? 'border-primary' : 'border-transparent hover:border-gray-300'}`}
+                ${i === 0 ? "border-primary" : "border-transparent hover:border-gray-300"}`}
             >
               <img
                 src={resolveImageUrl(url)}
@@ -142,11 +158,15 @@ export default function ImageUploader({ images = [], onChange, max = 8 }) {
             <div
               key={id}
               className={`rounded-xl border-2 border-dashed aspect-square flex flex-col items-center justify-center gap-1
-                ${state.error ? 'border-red-300 bg-red-50' : 'border-primary/40 bg-primary/5'}`}
+                ${state.error ? "border-red-300 bg-red-50" : "border-primary/40 bg-primary/5"}`}
             >
-              {state.progress
-                ? <Loader2 size={22} className="text-primary animate-spin" />
-                : <p className="text-[10px] text-red-500 text-center px-1">{state.error}</p>}
+              {state.progress ? (
+                <Loader2 size={22} className="text-primary animate-spin" />
+              ) : (
+                <p className="text-[10px] text-red-500 text-center px-1">
+                  {state.error}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -155,14 +175,19 @@ export default function ImageUploader({ images = [], onChange, max = 8 }) {
       {/* Drop zone */}
       {canUploadMore && (
         <div
-          onDragOver={e => { e.preventDefault(); setDraggingOver(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDraggingOver(true);
+          }}
           onDragLeave={() => setDraggingOver(false)}
           onDrop={onDrop}
           onClick={() => fileRef.current?.click()}
           className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
-            ${draggingOver
-              ? 'border-primary bg-primary/10 scale-[1.01]'
-              : 'border-border hover:border-primary hover:bg-primary/5'}`}
+            ${
+              draggingOver
+                ? "border-primary bg-primary/10 scale-[1.01]"
+                : "border-border hover:border-primary hover:bg-primary/5"
+            }`}
         >
           <input
             ref={fileRef}
@@ -170,7 +195,10 @@ export default function ImageUploader({ images = [], onChange, max = 8 }) {
             accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
             multiple
             className="hidden"
-            onChange={e => { if (e.target.files) handleFiles(e.target.files); e.target.value = ''; }}
+            onChange={(e) => {
+              if (e.target.files) handleFiles(e.target.files);
+              e.target.value = "";
+            }}
           />
 
           <div className="flex flex-col items-center gap-2 pointer-events-none">
@@ -182,12 +210,12 @@ export default function ImageUploader({ images = [], onChange, max = 8 }) {
               </div>
             )}
             <div>
-              <p className="text-sm font-semibold text-dark">
+              <p className="text-sm font-semibold text-dark dark:text-gray-100">
                 {draggingOver
-                  ? 'أفلت الصورة هنا / Drop here'
-                  : 'اسحب وأفلت أو انقر للرفع / Drag & drop or click'}
+                  ? "أفلت الصورة هنا / Drop here"
+                  : "اسحب وأفلت أو انقر للرفع / Drag & drop or click"}
               </p>
-              <p className="text-xs text-muted mt-0.5">
+              <p className="text-xs text-muted dark:text-gray-400 mt-0.5">
                 JPG, PNG, WebP — Max 4MB — {images.length}/{max} صور
               </p>
             </div>
@@ -196,14 +224,14 @@ export default function ImageUploader({ images = [], onChange, max = 8 }) {
       )}
 
       {images.length >= max && (
-        <p className="text-xs text-muted text-center">
+        <p className="text-xs text-muted dark:text-gray-400 text-center">
           وصلت للحد الأقصى {max} صور / Maximum {max} images reached
         </p>
       )}
 
       {/* Order hint */}
       {images.length > 1 && (
-        <p className="text-xs text-muted flex items-center gap-1">
+        <p className="text-xs text-muted dark:text-gray-400 flex items-center gap-1">
           <Star size={11} className="text-primary" />
           الصورة الأولى هي الصورة الرئيسية — انقر ⭐ لتعيين أي صورة رئيسية
         </p>
