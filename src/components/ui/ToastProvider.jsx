@@ -1,5 +1,5 @@
-import { Toaster } from 'sonner';
-import { useThemeStore } from '../store/useThemeStore';
+import { Toaster } from "sonner";
+import useThemeStore from "../../store/useThemeStore";
 
 /**
  * Toast notification component
@@ -13,12 +13,12 @@ export default function ToastProvider() {
       position="top-right"
       richColors
       expand={false}
-      theme={dark ? 'dark' : 'light'}
+      theme={dark ? "dark" : "light"}
       toastOptions={{
         duration: 3000,
         style: {
-          background: dark ? '#1a1a25' : '#fff',
-          border: '1px solid rgba(128, 128, 128, 0.2)',
+          background: dark ? "#1a1a25" : "#fff",
+          border: "1px solid rgba(128, 128, 128, 0.2)",
         },
       }}
     />
