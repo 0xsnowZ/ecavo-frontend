@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -18,12 +18,12 @@
     overflow-x: hidden;
   }
 
-  html[dir='rtl'] {
-    font-family: 'Cairo', system-ui, sans-serif;
+  html[dir="rtl"] {
+    font-family: "Cairo", system-ui, sans-serif;
   }
 
-  html[dir='ltr'] {
-    font-family: 'Inter', system-ui, sans-serif;
+  html[dir="ltr"] {
+    font-family: "Inter", system-ui, sans-serif;
   }
 
   body {
@@ -50,10 +50,22 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-400;
   }
+
+  /* Dark scrollbar (admin) */
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
 }
 
 @layer components {
-
   /* Container */
   .container-main {
     @apply max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8;
@@ -73,12 +85,12 @@
   }
 
   .btn-ghost {
-    @apply text-muted hover:text-dark hover:bg-gray-100 font-medium px-4 py-2 rounded-lg transition-all duration-200 ease-smooth inline-flex items-center gap-2;
+    @apply text-muted dark:text-gray-400 hover:text-dark dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 font-medium px-4 py-2 rounded-lg transition-all duration-200 ease-smooth inline-flex items-center gap-2;
   }
 
   /* Cards */
   .card {
-    @apply bg-white rounded-lg shadow-card hover:shadow-hover transition-shadow duration-300;
+    @apply bg-white dark:bg-[#1a1a25] rounded-lg shadow-card dark:shadow-none dark:ring-1 dark:ring-white/10 hover:shadow-hover dark:hover:ring-white/15 transition-all duration-300;
   }
 
   /* Badge */
@@ -92,7 +104,7 @@
 
   /* Form inputs */
   .input-field {
-    @apply w-full border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors duration-200 bg-white placeholder:text-gray-400;
+    @apply w-full border border-border dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors duration-200 bg-white dark:bg-white/[0.05] dark:text-white dark:focus:bg-white/[0.08] dark:focus:ring-primary/20 placeholder:text-gray-400 dark:placeholder:text-gray-500;
   }
 
   /* Section heading */
@@ -101,7 +113,7 @@
   }
 
   .section-title::after {
-    content: '';
+    content: "";
     @apply absolute bottom-0 start-0 w-12 h-1 bg-primary rounded-full;
   }
 
@@ -109,8 +121,6 @@
   .product-img-wrapper {
     @apply relative overflow-hidden;
   }
-
-
 
   /* Glass effect hover overlay */
   .glass-hover {
@@ -130,6 +140,15 @@
   .status-badge {
     @apply text-xs font-semibold px-2.5 py-1 rounded-full;
   }
+
+  /* Admin table enhancements */
+  .admin-table tbody tr {
+    @apply even:bg-gray-50/50 dark:even:bg-white/[0.02];
+  }
+
+  .admin-table tbody tr:hover {
+    @apply bg-gray-100/80 dark:bg-white/[0.05];
+  }
 }
 
 @layer utilities {
@@ -147,7 +166,7 @@
   }
 
   /* RTL flip for icons that need it */
-  html[dir='rtl'] .rtl-flip {
+  html[dir="rtl"] .rtl-flip {
     transform: scaleX(-1);
   }
 
@@ -181,7 +200,7 @@
   background: white;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
-  color: #E63946;
+  color: #e63946;
   top: 50%;
   transform: translateY(-50%);
   margin-top: 0;
