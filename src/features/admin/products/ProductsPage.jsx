@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Image,
 } from "lucide-react";
+import { toast } from "sonner";
 import { adminService, categoriesService } from "../../../services";
 import Spinner from "../../../components/ui/Spinner";
 import ImageUploader from "../../../components/admin/ImageUploader";
@@ -114,14 +115,27 @@ export default function ProductsPage() {
     try {
       if (modal === "create") {
         await adminService.products.create(form);
+        toast.success(
+          isAr ? "تم إنشاء المنتج بنجاح ✓" : "Product created successfully",
+          { description: form.name_en || form.name_ar },
+        );
       } else {
         await adminService.products.update(editProduct.id, form);
+        toast.success(
+          isAr ? "تم تحديث المنتج بنجاح ✓" : "Product updated successfully",
+          { description: form.name_en || form.name_ar },
+        );
       }
       setModal(null);
       fetchProducts();
     } catch (err) {
       const serverErrors = err.response?.data?.errors || {};
       setErrors(serverErrors);
+      toast.error(isAr ? "فشل في حفظ المنتج" : "Failed to save product", {
+        description: isAr
+          ? "يرجى التحقق من البيانات والمحاولة مرة أخرى"
+          : "Please check your data and try again",
+      });
     } finally {
       setSaving(false);
     }
@@ -130,7 +144,17 @@ export default function ProductsPage() {
   const handleDelete = async (id) => {
     try {
       await adminService.products.delete(id);
+      toast.success(
+        isAr ? "تم حذف المنتج بنجاح ✓" : "Product deleted successfully",
+        { description: `Product #${id}` },
+      );
       fetchProducts();
+    } catch {
+      toast.error(isAr ? "فشل في حذف المنتج" : "Failed to delete product", {
+        description: isAr
+          ? "لا يمكن حذف هذا المنتج"
+          : "Cannot delete this product",
+      });
     } finally {
       setDeleting(null);
     }

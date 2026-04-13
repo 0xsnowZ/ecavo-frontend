@@ -2,6 +2,7 @@ import { useLocaleStore } from "../../../store/useLocaleStore";
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, RefreshCw, ChevronDown, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { adminService } from "../../../services";
 import Spinner from "../../../components/ui/Spinner";
 
@@ -118,12 +119,19 @@ export default function OrdersPage() {
     setUpdating(true);
     try {
       await adminService.orders.updateStatus(editOrder.id, newStatus);
-      setUpdateSuccess(
+      toast.success(
         isAr
           ? "تم تحديث الحالة بنجاح ✓"
           : isFr
             ? "Statut mis à jour avec succès ✓"
             : "Status updated ✓",
+        {
+          description: isAr
+            ? `طلب #${editOrder.id}`
+            : isFr
+              ? `Commande #${editOrder.id}`
+              : `Order #${editOrder.id}`,
+        },
       );
       fetchOrders();
       setTimeout(() => {
@@ -131,8 +139,15 @@ export default function OrdersPage() {
         setUpdateSuccess("");
       }, 1200);
     } catch {
-      alert(
+      toast.error(
         isAr ? "حدث خطأ" : isFr ? "Échec de la mise à jour" : "Update failed",
+        {
+          description: isAr
+            ? "فشل في تحديث حالة الطلب"
+            : isFr
+              ? "Échec de la mise à jour du statut"
+              : "Failed to update order status",
+        },
       );
     } finally {
       setUpdating(false);

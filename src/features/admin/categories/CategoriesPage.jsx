@@ -2,6 +2,7 @@ import { useLocaleStore } from "../../../store/useLocaleStore";
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus, Edit2, Trash2, X, Loader2, RefreshCw, Tag } from "lucide-react";
+import { toast } from "sonner";
 import { adminService } from "../../../services";
 import Spinner from "../../../components/ui/Spinner";
 import { getLocalized } from "../../../utils/localize";
@@ -69,13 +70,26 @@ export default function CategoriesPage() {
     try {
       if (modal === "create") {
         await adminService.categories.create(form);
+        toast.success(
+          isAr ? "تم إنشاء القسم بنجاح ✓" : "Category created successfully",
+          { description: form.name_en || form.name_ar },
+        );
       } else {
         await adminService.categories.update(editCat.id, form);
+        toast.success(
+          isAr ? "تم تحديث القسم بنجاح ✓" : "Category updated successfully",
+          { description: form.name_en || form.name_ar },
+        );
       }
       setModal(null);
       fetchCategories();
     } catch (err) {
       setErrors(err.response?.data?.errors || {});
+      toast.error(isAr ? "فشل في حفظ القسم" : "Failed to save category", {
+        description: isAr
+          ? "يرجى التحقق من البيانات"
+          : "Please check your data",
+      });
     } finally {
       setSaving(false);
     }
@@ -84,9 +98,17 @@ export default function CategoriesPage() {
   const handleDelete = async (id) => {
     try {
       await adminService.categories.delete(id);
+      toast.success(
+        isAr ? "تم حذف القسم بنجاح ✓" : "Category deleted successfully",
+        { description: `Category #${id}` },
+      );
       fetchCategories();
     } catch (err) {
-      alert(err.response?.data?.message || "Delete failed");
+      toast.error(isAr ? "فشل في حذف القسم" : "Failed to delete category", {
+        description:
+          err.response?.data?.message ||
+          (isAr ? "لا يمكن حذف هذا القسم" : "Cannot delete this category"),
+      });
     } finally {
       setDeleting(null);
     }

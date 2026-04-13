@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { adminService } from "../../../services";
 import Spinner from "../../../components/ui/Spinner";
+import SkeletonLoader from "../../../components/ui/SkeletonLoader";
 import {
   AreaChart,
   Area,
@@ -284,12 +285,50 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, [language]);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="flex justify-center py-24">
-        <Spinner size="lg" />
+      <div className="space-y-6">
+        {/* KPI skeleton cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="card p-5">
+              <SkeletonLoader circle width={40} height={40} />
+              <SkeletonLoader height={24} width={80} className="mt-3" />
+              <SkeletonLoader height={12} width={60} className="mt-2" />
+            </div>
+          ))}
+        </div>
+
+        {/* Quick stats skeleton */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="card p-4">
+              <SkeletonLoader height={36} />
+              <SkeletonLoader height={20} width={50} className="mt-3" />
+              <SkeletonLoader height={12} width={70} className="mt-2" />
+            </div>
+          ))}
+        </div>
+
+        {/* Chart skeleton */}
+        <div className="card p-5">
+          <SkeletonLoader height={24} width={200} className="mb-4" />
+          <SkeletonLoader height={280} />
+        </div>
+
+        {/* Status grid skeleton */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="card p-4">
+              <SkeletonLoader circle width={32} height={32} />
+              <SkeletonLoader height={20} width={40} className="mt-2" />
+              <SkeletonLoader height={10} width={60} className="mt-1" />
+            </div>
+          ))}
+        </div>
       </div>
     );
+  }
 
   const byStatus = stats?.by_status || {};
   const total = stats?.total_orders || 0;
