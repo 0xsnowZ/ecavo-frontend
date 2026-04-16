@@ -6,6 +6,7 @@ import { ordersService } from '../services';
 import { useAuthStore } from '../store/useAuthStore';
 import { useLocaleStore } from '../store/useLocaleStore';
 import Spinner from '../components/ui/Spinner';
+import { resolveImageUrl } from '../utils/imageUrl';
 
 const STATUS_STEPS = [
   { status: 'placed',            icon: CheckCircle2, labelAr: 'تم الطلب',            labelEn: 'Order Placed' },
@@ -86,7 +87,7 @@ export default function OrderConfirm() {
             {order.items?.map(item => (
               <div key={item.id} className="flex items-center gap-3">
                 {item.product?.images?.[0] && (
-                  <img src={item.product.images[0]} className="w-12 h-12 object-contain rounded-lg bg-gray-50 p-1" alt="" />
+                  <img src={resolveImageUrl(item.product.images[0])} className="w-12 h-12 object-contain rounded-lg bg-gray-50 p-1" alt="" />
                 )}
                 <div className="flex-1">
                   <p className="text-sm font-medium text-dark">{item.product_name}</p>
