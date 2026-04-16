@@ -1,184 +1,283 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { User, Phone, MapPin, FileText, Loader2, CheckCircle2, ChevronRight } from 'lucide-react';
-import { useCartStore } from '../store/useCartStore';
-import { useAuthStore } from '../store/useAuthStore';
-import { useLocaleStore } from '../store/useLocaleStore';
-import { ordersService } from '../services';
-import { getLocalized } from '../utils/localize';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import {
+  User,
+  Phone,
+  MapPin,
+  FileText,
+  Loader2,
+  CheckCircle2,
+  ChevronRight,
+} from "lucide-react";
+import { useCartStore } from "../store/useCartStore";
+import { useAuthStore } from "../store/useAuthStore";
+import { useLocaleStore } from "../store/useLocaleStore";
+import { ordersService } from "../services";
+import { getLocalized } from "../utils/localize";
+import { resolveImageUrl } from "../utils/imageUrl";
 
 // Payment method icons (placeholder)
 const PAYMENT_METHODS = [
-  { id: 'cod', labelAr: 'الدفع عند الاستلام', labelEn: 'Cash on Delivery', icon: '💵' },
+  {
+    id: "cod",
+    labelAr: "الدفع عند الاستلام",
+    labelEn: "Cash on Delivery",
+    icon: "💵",
+  },
 ];
 
 export default function Checkout() {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
-  const isFr = i18n.language === 'fr';
+  const isAr = i18n.language === "ar";
+  const isFr = i18n.language === "fr";
   const navigate = useNavigate();
 
-  const { items, getSubtotal, getTotal, deliveryFee, getDiscount, coupon, clearCart } = useCartStore();
+  const {
+    items,
+    getSubtotal,
+    getTotal,
+    deliveryFee,
+    getDiscount,
+    coupon,
+    clearCart,
+  } = useCartStore();
   const { isAuthenticated } = useAuthStore();
   const { currency } = useLocaleStore();
 
   const fmt = (usd) => `${currency.symbol}${(usd * currency.rate).toFixed(2)}`;
 
   const [form, setForm] = useState({
-    name: '', phone: '', address: '', city: '', notes: '',
-    coupon_code: coupon?.code || '',
+    name: "",
+    phone: "",
+    address: "",
+    city: "",
+    notes: "",
+    coupon_code: coupon?.code || "",
   });
-  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState('');
+  const [apiError, setApiError] = useState("");
 
   const set = (k, v) => {
-    setForm(f => ({ ...f, [k]: v }));
-    setErrors(e => ({ ...e, [k]: '' }));
+    setForm((f) => ({ ...f, [k]: v }));
+    setErrors((e) => ({ ...e, [k]: "" }));
   };
 
   const validate = () => {
     const errs = {};
-    if (!form.name)    errs.name    = isAr ? 'الاسم مطلوب'     : isFr ? 'Nom requis'       : 'Name required';
-    if (!form.phone)   errs.phone   = isAr ? 'الهاتف مطلوب'    : isFr ? 'Téléphone requis'  : 'Phone required';
-    if (!form.address) errs.address = isAr ? 'العنوان مطلوب'    : isFr ? 'Adresse requise'   : 'Address required';
-    if (!form.city)    errs.city    = isAr ? 'المدينة مطلوبة'   : isFr ? 'Ville requise'     : 'City required';
+    if (!form.name)
+      errs.name = isAr ? "الاسم مطلوب" : isFr ? "Nom requis" : "Name required";
+    if (!form.phone)
+      errs.phone = isAr
+        ? "الهاتف مطلوب"
+        : isFr
+          ? "Téléphone requis"
+          : "Phone required";
+    if (!form.address)
+      errs.address = isAr
+        ? "العنوان مطلوب"
+        : isFr
+          ? "Adresse requise"
+          : "Address required";
+    if (!form.city)
+      errs.city = isAr
+        ? "المدينة مطلوبة"
+        : isFr
+          ? "Ville requise"
+          : "City required";
     return errs;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
 
     // Build items payload from frontend cart (backend needs them since cart is client-side)
-    const cartPayload = items.map(item => ({
+    const cartPayload = items.map((item) => ({
       product_id: item.product.id,
       qty: item.qty,
       variant_id: item.variant?.id ?? null,
     }));
 
     setLoading(true);
-    setApiError('');
+    setApiError("");
     try {
       const res = await ordersService.checkout({ ...form, items: cartPayload });
       const orderId = res.data.order?.id;
       clearCart();
       navigate(`/order-confirm/${orderId}`);
     } catch (err) {
-      const msg = err.response?.data?.message
-        || (isAr ? 'حدث خطأ أثناء إتمام الطلب' : isFr ? 'Échec du paiement, veuillez réessayer' : 'Checkout failed, please try again');
+      const msg =
+        err.response?.data?.message ||
+        (isAr
+          ? "حدث خطأ أثناء إتمام الطلب"
+          : isFr
+            ? "Échec du paiement, veuillez réessayer"
+            : "Checkout failed, please try again");
       setApiError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  if (items.length === 0) return (
-    <div className="container-main py-24 text-center">
-      <p className="text-xl text-muted mb-4">{t('checkout.empty_cart')}</p>
-      <Link to="/products" className="btn-primary">{t('checkout.shop_now')}</Link>
-    </div>
-  );
+  if (items.length === 0)
+    return (
+      <div className="container-main py-24 text-center">
+        <p className="text-xl text-muted mb-4">{t("checkout.empty_cart")}</p>
+        <Link to="/products" className="btn-primary">
+          {t("checkout.shop_now")}
+        </Link>
+      </div>
+    );
 
   return (
     <div className="container-main py-8">
       {/* Breadcrumb */}
       <nav className="text-xs text-muted mb-6 flex items-center gap-2">
-        <Link to="/" className="hover:text-primary">{t('nav.home')}</Link>
+        <Link to="/" className="hover:text-primary">
+          {t("nav.home")}
+        </Link>
         <ChevronRight size={12} className="rtl-flip" />
-        <Link to="/cart" className="hover:text-primary">{t('cart.title')}</Link>
+        <Link to="/cart" className="hover:text-primary">
+          {t("cart.title")}
+        </Link>
         <ChevronRight size={12} className="rtl-flip" />
-        <span className="text-dark">{t('checkout.title')}</span>
+        <span className="text-dark">{t("checkout.title")}</span>
       </nav>
 
-      <h1 className="text-2xl font-bold text-secondary mb-6">{t('checkout.title')}</h1>
+      <h1 className="text-2xl font-bold text-secondary mb-6">
+        {t("checkout.title")}
+      </h1>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="flex flex-col lg:flex-row gap-6">
-
           {/* ── Left: Shipping + Payment ── */}
           <div className="flex-1 space-y-5">
-
             {/* Shipping details card */}
             <div className="card p-6 space-y-4">
               <h2 className="font-bold text-secondary flex items-center gap-2">
                 <MapPin size={18} className="text-primary" />
-                {t('checkout.shipping_details')}
+                {t("checkout.shipping_details")}
               </h2>
 
               {/* Name */}
               <div>
-                <label className="block text-sm font-semibold text-dark mb-1.5">{t('checkout.name')}</label>
+                <label className="block text-sm font-semibold text-dark mb-1.5">
+                  {t("checkout.name")}
+                </label>
                 <div className="relative">
-                  <User size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
+                  <User
+                    size={16}
+                    className="absolute start-3 top-1/2 -translate-y-1/2 text-muted"
+                  />
                   <input
                     type="text"
                     value={form.name}
-                    onChange={e => set('name', e.target.value)}
-                    placeholder={isAr ? 'محمد أحمد' : t('checkout.name_placeholder')}
-                    className={`input-field ps-9 ${errors.name ? 'border-red-400' : ''}`}
+                    onChange={(e) => set("name", e.target.value)}
+                    placeholder={
+                      isAr ? "محمد أحمد" : t("checkout.name_placeholder")
+                    }
+                    className={`input-field ps-9 ${errors.name ? "border-red-400" : ""}`}
                   />
                 </div>
-                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+                {errors.name && (
+                  <p className="text-xs text-red-500 mt-1">{errors.name}</p>
+                )}
               </div>
 
               {/* Phone */}
               <div>
-                <label className="block text-sm font-semibold text-dark mb-1.5">{t('checkout.phone')}</label>
+                <label className="block text-sm font-semibold text-dark mb-1.5">
+                  {t("checkout.phone")}
+                </label>
                 <div className="relative">
-                  <Phone size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
+                  <Phone
+                    size={16}
+                    className="absolute start-3 top-1/2 -translate-y-1/2 text-muted"
+                  />
                   <input
                     type="tel"
                     value={form.phone}
-                    onChange={e => set('phone', e.target.value)}
+                    onChange={(e) => set("phone", e.target.value)}
                     placeholder="+20 100 000 0000"
-                    className={`input-field ps-9 ${errors.phone ? 'border-red-400' : ''}`}
+                    className={`input-field ps-9 ${errors.phone ? "border-red-400" : ""}`}
                   />
                 </div>
-                {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
+                {errors.phone && (
+                  <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
+                )}
               </div>
 
               {/* Address + City */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-dark mb-1.5">{t('checkout.street')}</label>
+                  <label className="block text-sm font-semibold text-dark mb-1.5">
+                    {t("checkout.street")}
+                  </label>
                   <input
                     type="text"
                     value={form.address}
-                    onChange={e => set('address', e.target.value)}
-                    placeholder={isAr ? 'شارع الجمهورية 45' : t('checkout.address_placeholder')}
-                    className={`input-field ${errors.address ? 'border-red-400' : ''}`}
+                    onChange={(e) => set("address", e.target.value)}
+                    placeholder={
+                      isAr
+                        ? "شارع الجمهورية 45"
+                        : t("checkout.address_placeholder")
+                    }
+                    className={`input-field ${errors.address ? "border-red-400" : ""}`}
                   />
-                  {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
+                  {errors.address && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.address}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-dark mb-1.5">{t('checkout.city')}</label>
+                  <label className="block text-sm font-semibold text-dark mb-1.5">
+                    {t("checkout.city")}
+                  </label>
                   <input
                     type="text"
                     value={form.city}
-                    onChange={e => set('city', e.target.value)}
-                    placeholder={isAr ? 'القاهرة' : t('checkout.city_placeholder')}
-                    className={`input-field ${errors.city ? 'border-red-400' : ''}`}
+                    onChange={(e) => set("city", e.target.value)}
+                    placeholder={
+                      isAr ? "القاهرة" : t("checkout.city_placeholder")
+                    }
+                    className={`input-field ${errors.city ? "border-red-400" : ""}`}
                   />
-                  {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city}</p>}
+                  {errors.city && (
+                    <p className="text-xs text-red-500 mt-1">{errors.city}</p>
+                  )}
                 </div>
               </div>
 
               {/* Notes */}
               <div>
                 <label className="block text-sm font-semibold text-dark mb-1.5">
-                  {t('checkout.notes')} <span className="text-muted font-normal">{t('checkout.optional')}</span>
+                  {t("checkout.notes")}{" "}
+                  <span className="text-muted font-normal">
+                    {t("checkout.optional")}
+                  </span>
                 </label>
                 <div className="relative">
-                  <FileText size={16} className="absolute start-3 top-3 text-muted" />
+                  <FileText
+                    size={16}
+                    className="absolute start-3 top-3 text-muted"
+                  />
                   <textarea
                     value={form.notes}
-                    onChange={e => set('notes', e.target.value)}
+                    onChange={(e) => set("notes", e.target.value)}
                     rows={3}
-                    placeholder={isAr ? 'ملاحظات إضافية للتوصيل...' : t('checkout.notes_placeholder')}
+                    placeholder={
+                      isAr
+                        ? "ملاحظات إضافية للتوصيل..."
+                        : t("checkout.notes_placeholder")
+                    }
                     className="input-field ps-9 resize-none"
                   />
                 </div>
@@ -187,13 +286,15 @@ export default function Checkout() {
 
             {/* Payment method */}
             <div className="card p-6">
-              <h2 className="font-bold text-secondary mb-4">{t('checkout.payment')}</h2>
+              <h2 className="font-bold text-secondary mb-4">
+                {t("checkout.payment")}
+              </h2>
               <div className="space-y-2">
-                {PAYMENT_METHODS.map(m => (
+                {PAYMENT_METHODS.map((m) => (
                   <label
                     key={m.id}
                     className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all
-                      ${paymentMethod === m.id ? 'border-primary bg-primary/5' : 'border-border hover:border-gray-300'}`}
+                      ${paymentMethod === m.id ? "border-primary bg-primary/5" : "border-border hover:border-gray-300"}`}
                   >
                     <input
                       type="radio"
@@ -205,7 +306,7 @@ export default function Checkout() {
                     />
                     <span className="text-xl">{m.icon}</span>
                     <span className="font-semibold text-dark text-sm">
-                      {isAr ? m.labelAr : isFr ? t('checkout.cod') : m.labelEn}
+                      {isAr ? m.labelAr : isFr ? t("checkout.cod") : m.labelEn}
                     </span>
                   </label>
                 ))}
@@ -217,17 +318,17 @@ export default function Checkout() {
           <div className="lg:w-80 shrink-0">
             <div className="card p-5 space-y-4 sticky top-24">
               <h2 className="font-bold text-secondary border-b border-border pb-3">
-                {t('checkout.order_summary')}
+                {t("checkout.order_summary")}
               </h2>
 
               {/* Items mini list */}
               <div className="space-y-3 max-h-52 overflow-y-auto">
-                {items.map(item => (
+                {items.map((item) => (
                   <div key={item.key} className="flex items-center gap-2">
                     <div className="relative">
                       <img
-                        src={item.product.images?.[0]}
-                        alt={getLocalized(item.product, 'name', i18n.language)}
+                        src={resolveImageUrl(item.product.images?.[0])}
+                        alt={getLocalized(item.product, "name", i18n.language)}
                         className="w-12 h-12 object-contain rounded-lg bg-gray-50 p-1"
                       />
                       <span className="absolute -top-1 -end-1 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
@@ -235,7 +336,9 @@ export default function Checkout() {
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-dark line-clamp-1">{getLocalized(item.product, 'name', i18n.language)}</p>
+                      <p className="text-xs text-dark line-clamp-1">
+                        {getLocalized(item.product, "name", i18n.language)}
+                      </p>
                     </div>
                     <span className="text-xs font-semibold text-dark">
                       {fmt(item.product.price * item.qty)}
@@ -247,21 +350,21 @@ export default function Checkout() {
               {/* Totals */}
               <div className="space-y-2 text-sm border-t border-border pt-3">
                 <div className="flex justify-between text-muted">
-                  <span>{t('cart.subtotal')}</span>
+                  <span>{t("cart.subtotal")}</span>
                   <span>{fmt(getSubtotal())}</span>
                 </div>
                 {getDiscount() > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>{t('checkout.discount')}</span>
+                    <span>{t("checkout.discount")}</span>
                     <span>- {fmt(getDiscount())}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-muted">
-                  <span>{t('cart.delivery')}</span>
+                  <span>{t("cart.delivery")}</span>
                   <span>{fmt(deliveryFee)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-dark text-base pt-1 border-t border-border">
-                  <span>{t('cart.total')}</span>
+                  <span>{t("cart.total")}</span>
                   <span className="text-primary">{fmt(getTotal())}</span>
                 </div>
               </div>
@@ -276,9 +379,11 @@ export default function Checkout() {
               {/* Guest warning */}
               {!isAuthenticated && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700">
-                  <p className="font-semibold mb-1">{t('checkout.guest_note')}</p>
+                  <p className="font-semibold mb-1">
+                    {t("checkout.guest_note")}
+                  </p>
                   <Link to="/login" className="text-primary hover:underline">
-                    {t('checkout.guest_signin')}
+                    {t("checkout.guest_signin")}
                   </Link>
                 </div>
               )}
@@ -288,10 +393,13 @@ export default function Checkout() {
                 disabled={loading}
                 className="btn-primary w-full justify-center py-3"
               >
-                {loading
-                  ? <Loader2 size={20} className="animate-spin" />
-                  : <><CheckCircle2 size={18} /> {t('checkout.place_order')}</>
-                }
+                {loading ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  <>
+                    <CheckCircle2 size={18} /> {t("checkout.place_order")}
+                  </>
+                )}
               </button>
             </div>
           </div>

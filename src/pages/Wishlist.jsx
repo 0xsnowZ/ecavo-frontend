@@ -1,18 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Trash2, ShoppingBag } from 'lucide-react';
-import { useWishlistStore } from '../store/useWishlistStore';
-import { useCartStore } from '../store/useCartStore';
-import { useLocaleStore } from '../store/useLocaleStore';
-import StarRating from '../components/ui/StarRating';
-import { getLocalized } from '../utils/localize';
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { Heart, ShoppingCart, Trash2, ShoppingBag } from "lucide-react";
+import { useWishlistStore } from "../store/useWishlistStore";
+import { useCartStore } from "../store/useCartStore";
+import { useLocaleStore } from "../store/useLocaleStore";
+import StarRating from "../components/ui/StarRating";
+import { getLocalized } from "../utils/localize";
+import { resolveImageUrl } from "../utils/imageUrl";
 
 export default function Wishlist() {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
   const { items, toggle } = useWishlistStore();
-  const addItem = useCartStore(s => s.addItem);
+  const addItem = useCartStore((s) => s.addItem);
   const { currency } = useLocaleStore();
 
   const fmt = (usd) => `${currency.symbol}${(usd * currency.rate).toFixed(2)}`;
@@ -22,40 +23,48 @@ export default function Wishlist() {
     toggle(product); // remove from wishlist
   };
 
-  if (items.length === 0) return (
-    <div className="container-main py-24 flex flex-col items-center text-center gap-4">
-      <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
-        <Heart size={36} className="text-red-300" />
+  if (items.length === 0)
+    return (
+      <div className="container-main py-24 flex flex-col items-center text-center gap-4">
+        <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
+          <Heart size={36} className="text-red-300" />
+        </div>
+        <h1 className="text-2xl font-bold text-secondary">
+          {isAr ? "قائمة الأمنيات فارغة" : "Your wishlist is empty"}
+        </h1>
+        <p className="text-muted text-sm max-w-xs">
+          {isAr
+            ? "اضغط على أيقونة القلب في أي منتج لإضافته إلى قائمة أمنياتك."
+            : "Click the heart icon on any product to save it here."}
+        </p>
+        <Link to="/products" className="btn-primary mt-2">
+          {isAr ? "تصفح المنتجات" : "Browse Products"}
+        </Link>
       </div>
-      <h1 className="text-2xl font-bold text-secondary">
-        {isAr ? 'قائمة الأمنيات فارغة' : 'Your wishlist is empty'}
-      </h1>
-      <p className="text-muted text-sm max-w-xs">
-        {isAr
-          ? 'اضغط على أيقونة القلب في أي منتج لإضافته إلى قائمة أمنياتك.'
-          : 'Click the heart icon on any product to save it here.'}
-      </p>
-      <Link to="/products" className="btn-primary mt-2">
-        {isAr ? 'تصفح المنتجات' : 'Browse Products'}
-      </Link>
-    </div>
-  );
+    );
 
   return (
     <div className="container-main py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-secondary">{t('header.my_wishlist')}</h1>
+          <h1 className="text-2xl font-bold text-secondary">
+            {t("header.my_wishlist")}
+          </h1>
           <p className="text-sm text-muted mt-1">
-            {isAr ? `${items.length} منتج` : `${items.length} item${items.length !== 1 ? 's' : ''}`}
+            {isAr
+              ? `${items.length} منتج`
+              : `${items.length} item${items.length !== 1 ? "s" : ""}`}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {items.map((product) => (
-          <div key={product.id} className="card group relative overflow-hidden flex flex-col animate-fade-in">
+          <div
+            key={product.id}
+            className="card group relative overflow-hidden flex flex-col animate-fade-in"
+          >
             {/* Remove button */}
             <button
               onClick={() => toggle(product)}
@@ -67,10 +76,13 @@ export default function Wishlist() {
             </button>
 
             {/* Image */}
-            <Link to={`/products/${product.slug}`} className="block h-44 bg-gray-50 p-4 overflow-hidden">
+            <Link
+              to={`/products/${product.slug}`}
+              className="block h-44 bg-gray-50 p-4 overflow-hidden"
+            >
               <img
-                src={product.images?.[0]}
-                alt={getLocalized(product, 'name', i18n.language)}
+                src={resolveImageUrl(product.images?.[0])}
+                alt={getLocalized(product, "name", i18n.language)}
                 className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                 loading="lazy"
               />
@@ -82,7 +94,7 @@ export default function Wishlist() {
                 to={`/products/${product.slug}`}
                 className="text-sm font-semibold text-dark hover:text-primary transition-colors line-clamp-2"
               >
-                {getLocalized(product, 'name', i18n.language)}
+                {getLocalized(product, "name", i18n.language)}
               </Link>
 
               {product.rating !== undefined && (
@@ -90,9 +102,13 @@ export default function Wishlist() {
               )}
 
               <div className="flex items-center gap-2 mt-auto">
-                <span className="font-bold text-primary text-base">{fmt(product.price)}</span>
+                <span className="font-bold text-primary text-base">
+                  {fmt(product.price)}
+                </span>
                 {product.originalPrice && (
-                  <del className="text-xs text-muted">{fmt(product.originalPrice)}</del>
+                  <del className="text-xs text-muted">
+                    {fmt(product.originalPrice)}
+                  </del>
                 )}
               </div>
 
@@ -103,7 +119,7 @@ export default function Wishlist() {
                   className="btn-primary flex-1 justify-center text-xs py-2 gap-1"
                 >
                   <ShoppingCart size={14} />
-                  {t('products.add_to_cart')}
+                  {t("products.add_to_cart")}
                 </button>
               </div>
             </div>
