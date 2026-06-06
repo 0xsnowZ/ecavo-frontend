@@ -34,6 +34,7 @@ const AdminDashboard  = lazy(() => import('../features/admin/dashboard/Dashboard
 const AdminOrders     = lazy(() => import('../features/admin/orders/OrdersPage'));
 const AdminProducts   = lazy(() => import('../features/admin/products/ProductsPage'));
 const AdminCategories = lazy(() => import('../features/admin/categories/CategoriesPage'));
+const AdminReviews    = lazy(() => import('../features/admin/reviews/ReviewsPage'));
 
 const protect    = (el) => <ProtectedRoute>{el}</ProtectedRoute>;
 const adminGuard = (el) => <ProtectedRoute adminOnly>{el}</ProtectedRoute>;
@@ -63,10 +64,11 @@ const router = createBrowserRouter([
     path: '/admin',
     element: <AdminLayout />,
     children: [
-      { index: true,      element: adminGuard(withSuspense(AdminDashboard)) },
-      { path: 'orders',   element: adminGuard(withSuspense(AdminOrders)) },
-      { path: 'products', element: adminGuard(withSuspense(AdminProducts)) },
+      { index: true,        element: adminGuard(withSuspense(AdminDashboard)) },
+      { path: 'orders',     element: adminGuard(withSuspense(AdminOrders)) },
+      { path: 'products',   element: adminGuard(withSuspense(AdminProducts)) },
       { path: 'categories', element: adminGuard(withSuspense(AdminCategories)) },
+      { path: 'reviews',    element: adminGuard(withSuspense(AdminReviews)) },
     ],
   },
 ]);

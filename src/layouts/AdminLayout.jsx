@@ -6,6 +6,7 @@ import {
   Package,
   Tag,
   Store,
+  Star,
   Bell,
   LogOut,
   Moon,
@@ -26,21 +27,19 @@ const adminLinks = [
     labelKey: "admin.dashboard",
     end: true,
   },
-  { to: "/admin/orders", icon: ShoppingCart, labelKey: "admin.all_orders" },
-  { to: "/admin/products", icon: Package, labelKey: "admin.add_product" },
-  { to: "/admin/categories", icon: Tag, labelKey: "common.categories" },
-  { to: "/", icon: Store, labelKey: "admin.store" },
+  { to: "/admin/orders",     icon: ShoppingCart, labelKey: "admin.all_orders" },
+  { to: "/admin/products",   icon: Package,      labelKey: "admin.add_product" },
+  { to: "/admin/categories", icon: Tag,          labelKey: "common.categories" },
+  { to: "/admin/reviews",    icon: Star,         labelKey: "admin.reviews" },
+  { to: "/",                 icon: Store,        labelKey: "admin.store" },
 ];
 
 const PAGE_TITLES = {
-  "/admin": { ar: "لوحة التحكم", en: "Dashboard", fr: "Tableau de Bord" },
-  "/admin/orders": { ar: "إدارة الطلبات", en: "Orders", fr: "Commandes" },
-  "/admin/products": { ar: "إدارة المنتجات", en: "Products", fr: "Produits" },
-  "/admin/categories": {
-    ar: "إدارة الأقسام",
-    en: "Categories",
-    fr: "Catégories",
-  },
+  "/admin":            { ar: "لوحة التحكم",   en: "Dashboard",   fr: "Tableau de Bord" },
+  "/admin/orders":     { ar: "إدارة الطلبات",  en: "Orders",      fr: "Commandes" },
+  "/admin/products":   { ar: "إدارة المنتجات", en: "Products",    fr: "Produits" },
+  "/admin/categories": { ar: "إدارة الأقسام",  en: "Categories",  fr: "Catégories" },
+  "/admin/reviews":    { ar: "التقييمات",       en: "Reviews",     fr: "Avis" },
 };
 
 export default function AdminLayout() {

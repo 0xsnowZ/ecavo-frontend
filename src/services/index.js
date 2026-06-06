@@ -2,7 +2,7 @@ import api from './api';
 
 export const authService = {
   login: (data) => api.post('/auth/login', data),
-  tokenLogin: (data) => api.post('/auth/google/token-login', data),
+  tokenLogin: (data) => api.post('/auth/google/token-login', data), // data = { otc }
   register: (data) => api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
@@ -84,5 +84,10 @@ export const adminService = {
     create: (data) => api.post('/admin/categories', data),
     update: (id, data) => api.put(`/admin/categories/${id}`, data),
     delete: (id) => api.delete(`/admin/categories/${id}`),
+  },
+  reviews: {
+    list: (params) => api.get('/admin/reviews', { params }),
+    approve: (id) => api.patch(`/admin/reviews/${id}/approve`),
+    delete: (id) => api.delete(`/admin/reviews/${id}`),
   },
 };

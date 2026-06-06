@@ -24,12 +24,14 @@ export default function Login() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    
-    // Handle OAuth Token Redirection
-    if (token) {
+    const otc = params.get('otc');
+
+    // Handle Google OAuth redirect — exchange the one-time code for a session cookie
+    if (otc) {
+      // Clear the OTC from the URL immediately — it's single-use and short-lived
+      window.history.replaceState({}, document.title, location.pathname);
       setLoading(true);
-      authService.tokenLogin({ token })
+      authService.tokenLogin({ otc })
         .then(res => {
           setAuth(res.data.user);
           navigate(from, { replace: true });
@@ -38,10 +40,8 @@ export default function Login() {
           setLoading(false);
           setApiError(isAr ? 'فشل تسجيل الدخول عبر المزامنة، يرجى المحاولة مرة أخرى.' : 'Token sync failed, please try again.');
         });
-      // Clear token from URL immediately so it doesn't stay in history
-      window.history.replaceState({}, document.title, location.pathname);
     }
-    
+
     if (params.get('error') === 'oauth_failed') {
       setApiError(isAr ? 'فشل تسجيل الدخول عبر جوجل، يرجى المحاولة مرة أخرى.' : 'Google login failed, please try again.');
     }

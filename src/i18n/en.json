@@ -193,7 +193,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "reviews": "Reviews"
   },
   "footer": {
     "about_us": "Learn More About Us",
