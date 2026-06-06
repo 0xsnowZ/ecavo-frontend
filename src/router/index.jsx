@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import MainLayout from '../layouts/MainLayout';
@@ -9,9 +10,9 @@ const Fallback = () => (
   <div className="flex justify-center py-24"><Spinner size="lg" /></div>
 );
 
-const withSuspense = (Component) => (
+const withSuspense = (Comp) => (
   <Suspense fallback={<Fallback />}>
-    <Component />
+    <Comp />
   </Suspense>
 );
 

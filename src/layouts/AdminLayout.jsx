@@ -43,7 +43,7 @@ const PAGE_TITLES = {
 };
 
 export default function AdminLayout() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user, logout } = useAuthStore();
   const { dark, toggle } = useThemeStore();
   const { language } = useLocaleStore();
@@ -102,7 +102,7 @@ export default function AdminLayout() {
 
         {/* Nav */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {adminLinks.map(({ to, icon: Icon, labelKey, end }) => (
+          {adminLinks.map(({ to, icon: LinkIcon, labelKey, end }) => (
             <NavLink
               key={to}
               to={to}
@@ -116,7 +116,7 @@ export default function AdminLayout() {
                  }`
               }
             >
-              <Icon size={18} />
+              <LinkIcon size={18} />
               {t(labelKey)}
             </NavLink>
           ))}

@@ -45,7 +45,7 @@ export default function Login() {
     if (params.get('error') === 'oauth_failed') {
       setApiError(isAr ? 'فشل تسجيل الدخول عبر جوجل، يرجى المحاولة مرة أخرى.' : 'Google login failed, please try again.');
     }
-  }, [location.search, isAr, navigate, from, setAuth]);
+  }, [location.search, location.pathname, isAr, navigate, from, setAuth]);
 
   const set = (k, v) => {
     setForm(f => ({ ...f, [k]: v }));
