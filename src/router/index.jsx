@@ -29,13 +29,17 @@ const WishlistPage    = lazy(() => import('../pages/Wishlist'));
 const AccountPage     = lazy(() => import('../pages/Account'));
 const LoginPage       = lazy(() => import('../pages/Login'));
 const RegisterPage    = lazy(() => import('../pages/Register'));
+const ForgotPassword  = lazy(() => import('../pages/ForgotPassword'));
+const ResetPassword   = lazy(() => import('../pages/ResetPassword'));
 
 // Admin pages
 const AdminDashboard  = lazy(() => import('../features/admin/dashboard/DashboardPage'));
 const AdminOrders     = lazy(() => import('../features/admin/orders/OrdersPage'));
 const AdminProducts   = lazy(() => import('../features/admin/products/ProductsPage'));
 const AdminCategories = lazy(() => import('../features/admin/categories/CategoriesPage'));
+const AdminCoupons    = lazy(() => import('../features/admin/coupons/CouponsPage'));
 const AdminReviews    = lazy(() => import('../features/admin/reviews/ReviewsPage'));
+const AdminBanners    = lazy(() => import('../features/admin/banners/BannersPage'));
 
 const protect    = (el) => <ProtectedRoute>{el}</ProtectedRoute>;
 const adminGuard = (el) => <ProtectedRoute adminOnly>{el}</ProtectedRoute>;
@@ -53,6 +57,8 @@ const router = createBrowserRouter([
       { path: 'cart',               element: withSuspense(CartPage) },
       { path: 'login',              element: withSuspense(LoginPage) },
       { path: 'register',           element: withSuspense(RegisterPage) },
+      { path: 'forgot-password',    element: withSuspense(ForgotPassword) },
+      { path: 'reset-password',     element: withSuspense(ResetPassword) },
       // Protected customer routes
       { path: 'checkout',           element: protect(withSuspense(CheckoutPage)) },
       { path: 'order-confirm/:id',  element: protect(withSuspense(OrderConfirm)) },
@@ -69,7 +75,9 @@ const router = createBrowserRouter([
       { path: 'orders',     element: adminGuard(withSuspense(AdminOrders)) },
       { path: 'products',   element: adminGuard(withSuspense(AdminProducts)) },
       { path: 'categories', element: adminGuard(withSuspense(AdminCategories)) },
+      { path: 'coupons',    element: adminGuard(withSuspense(AdminCoupons)) },
       { path: 'reviews',    element: adminGuard(withSuspense(AdminReviews)) },
+      { path: 'banners',    element: adminGuard(withSuspense(AdminBanners)) },
     ],
   },
 ]);

@@ -65,6 +65,7 @@ function toCard(p) {
 
 /** Horizontal product carousel with skeleton loading state */
 function ProductCarousel({ products, loading, slidesPerView = { base: 2, sm: 3, lg: 4, xl: 5 }, showCountdown = false }) {
+  const { i18n } = useTranslation();
   if (loading) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -75,6 +76,8 @@ function ProductCarousel({ products, loading, slidesPerView = { base: 2, sm: 3, 
   return (
     <div className="swiper-container-home">
       <Swiper
+        key={i18n.dir()}
+        dir={i18n.dir()}
         modules={[Navigation, Autoplay]}
         spaceBetween={14}
         slidesPerView={slidesPerView.base}
@@ -121,7 +124,7 @@ export default function Home() {
       .then(r => setDeals((r.data.data || []).map(p => toCard(p))))
       .catch(() => { })
       .finally(() => setLoadingDeals(false));
-  }, [isAr]);
+  }, []);
 
   // Sale carousel — latest discounted products
   useEffect(() => {
@@ -129,7 +132,7 @@ export default function Home() {
       .then(r => setSale((r.data.data || []).map(p => toCard(p))))
       .catch(() => { })
       .finally(() => setLoadingSale(false));
-  }, [isAr]);
+  }, []);
 
   // Electronics section — TVs & Appliances
   useEffect(() => {
@@ -141,7 +144,7 @@ export default function Home() {
       })
       .catch(() => { })
       .finally(() => setLoadingElec(false));
-  }, [isAr]);
+  }, []);
 
   // Mobiles section
   useEffect(() => {
@@ -149,7 +152,7 @@ export default function Home() {
       .then(r => setMobiles((r.data.data || []).map(p => toCard(p))))
       .catch(() => { })
       .finally(() => setLoadingMobiles(false));
-  }, [isAr]);
+  }, []);
 
   // Appliances section
   useEffect(() => {
@@ -157,7 +160,7 @@ export default function Home() {
       .then(r => setAppliances((r.data.data || []).map(p => toCard(p))))
       .catch(() => { })
       .finally(() => setLoadingAppliances(false));
-  }, [isAr]);
+  }, []);
 
   // Recently Viewed — always localStorage-driven (guests & auth users alike)
   useEffect(() => {
@@ -180,7 +183,7 @@ export default function Home() {
     <div>
       {/* Hero: Sidebar + Slider */}
       <section className="container-main py-4">
-        <div className="flex gap-4 items-stretch h-[360px] lg:h-[420px]">
+        <div className="flex gap-4 items-stretch h-[220px] sm:h-[300px] lg:h-[420px]">
           {/* Category Sidebar */}
           <aside className="hidden lg:flex flex-col w-56 shrink-0 bg-white rounded-lg shadow-card p-3 h-full overflow-y-auto">
             <h5 className="text-xs font-bold uppercase tracking-wider text-muted px-2 mb-2">
@@ -223,7 +226,7 @@ export default function Home() {
 
       {/* Featured Deals (with countdown timer) */}
       <section className="container-main py-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
           <SectionTitle title={t('products.featured_deals')} />
           <Link to="/products?sort=discount&is_featured=1" className="text-sm text-primary hover:underline flex items-center gap-1">
             {t('products.view_all')} <ChevronRight size={14} className="rtl-flip" />
@@ -251,7 +254,7 @@ export default function Home() {
 
       {/* Sale Products */}
       <section className="container-main py-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
           <SectionTitle title={t('products.sale')} />
           <Link to="/products?sort=discount" className="text-sm text-primary hover:underline flex items-center gap-1">
             {t('products.view_all')} <ChevronRight size={14} className="rtl-flip" />
@@ -345,7 +348,7 @@ export default function Home() {
       {/* Viewed Products — only render when there is actual history */}
       {(loadingViewed || viewed.length > 0) && (
         <section className="container-main py-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
             <SectionTitle title={t('products.viewed_products')} />
             <Link to="/products?sort=latest" className="text-sm text-primary hover:underline flex items-center gap-1">
               {t('products.view_all')} <ChevronRight size={14} className="rtl-flip" />

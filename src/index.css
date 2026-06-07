@@ -107,6 +107,11 @@
     @apply w-full border border-border dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors duration-200 bg-white dark:bg-white/[0.05] dark:text-white dark:focus:bg-white/[0.08] dark:focus:ring-primary/20 placeholder:text-gray-400 dark:placeholder:text-gray-500;
   }
 
+  /* Force option tags to respect dark mode inside selects */
+  .input-field option {
+    @apply bg-white text-dark dark:bg-[#1a1a25] dark:text-white;
+  }
+
   /* Section heading */
   .section-title {
     @apply text-2xl font-bold text-secondary relative pb-3 mb-6 inline-block;
@@ -240,3 +245,4 @@
   object-fit: cover;
   display: block;
 }
+

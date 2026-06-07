@@ -4,19 +4,43 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-import slide1 from '../../assets/img/slide1.jpg';
-import slide2 from '../../assets/img/slide2.jpg';
-import slide3 from '../../assets/img/slide3.jpg';
-import slide4 from '../../assets/img/slide4.jpg';
-import slide5 from '../../assets/img/slide5.jpg';
-
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-
-const SLIDES = [slide1, slide2, slide3, slide4, slide5];
+import { bannersService } from '../../services';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 export default function HeroSlider() {
   const { i18n } = useTranslation();
-  
+  const [banners, setBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const { data } = await bannersService.getAll();
+        setBanners(data);
+      } catch (error) {
+        console.error('Failed to load banners', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBanners();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex-1 rounded-lg overflow-hidden shadow-card">
+        <Skeleton height={400} className="w-full h-full" borderRadius="0.5rem" />
+      </div>
+    );
+  }
+
+  if (banners.length === 0) {
+    return null; // or a fallback static image if preferred
+  }
+
   return (
     <div className="hero-slider-wrapper rounded-lg overflow-hidden shadow-card flex-1">
       <Swiper
@@ -28,16 +52,19 @@ export default function HeroSlider() {
         autoplay={{ delay: 4000, disableOnInteraction: false }}
         pagination={{ clickable: true }}
         navigation
-        loop
+        loop={banners.length > 1}
         className="w-full rounded-lg"
       >
-        {SLIDES.map((src, i) => (
-          <SwiperSlide key={i}>
-            <img
-              src={src}
-              alt={`slide-${i + 1}`}
-              loading={i === 0 ? 'eager' : 'lazy'}
-            />
+        {banners.map((banner, i) => (
+          <SwiperSlide key={banner.id}>
+            <div className="w-full relative bg-gray-100 dark:bg-gray-800 overflow-hidden rounded-lg" style={{ aspectRatio: '1280 / 575' }}>
+              <img
+                src={banner.image_url}
+                alt={`slide-${i + 1}`}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>

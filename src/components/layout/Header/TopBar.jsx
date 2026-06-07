@@ -17,7 +17,7 @@ export default function TopBar() {
   };
 
   return (
-    <div className="bg-secondary text-white py-1.5">
+    <div className="hidden lg:block bg-secondary text-white py-1.5">
       <div className="container-main flex items-center justify-between text-xs">
         {/* Welcome message */}
         <p className="hidden sm:block opacity-90">{t('header.welcome')}</p>

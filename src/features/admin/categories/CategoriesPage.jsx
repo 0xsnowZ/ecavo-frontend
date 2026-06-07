@@ -1,5 +1,7 @@
 import { useLocaleStore } from "../../../store/useLocaleStore";
+import useThemeStore from "../../../store/useThemeStore";
 import { useEffect, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Plus, Edit2, Trash2, X, Loader2, RefreshCw, Tag } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +22,7 @@ const EMPTY_FORM = {
 export default function CategoriesPage() {
   const { t, i18n } = useTranslation();
   const { language } = useLocaleStore();
+  const { dark } = useThemeStore();
   const isAr = language === "ar";
   const isFr = language === "fr";
 
@@ -304,10 +307,11 @@ export default function CategoriesPage() {
           </div>
 
           {/* Modal */}
-          {modal && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md animate-slide-down">
-                <div className="border-b border-border dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+          {modal && createPortal(
+            <div className={dark ? "dark" : ""}>
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md animate-slide-down">
+                  <div className="border-b border-border dark:border-gray-700 px-6 py-4 flex items-center justify-between">
                   <h3 className="font-bold text-secondary dark:text-white">
                     {modal === "create"
                       ? isAr
@@ -438,13 +442,16 @@ export default function CategoriesPage() {
                 </div>
               </div>
             </div>
+            </div>,
+            document.body
           )}
 
           {/* Delete confirm */}
-          {deleting && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 animate-fade-in">
-                <p className="text-2xl">🗑️</p>
+          {deleting && createPortal(
+            <div className={dark ? "dark" : ""}>
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 animate-fade-in">
+                  <p className="text-2xl">🗑️</p>
                 <p className="font-bold text-secondary dark:text-white">
                   {isAr ? "حذف القسم؟" : "Delete Category?"}
                 </p>
@@ -469,6 +476,8 @@ export default function CategoriesPage() {
                 </div>
               </div>
             </div>
+            </div>,
+            document.body
           )}
         </>
       )}

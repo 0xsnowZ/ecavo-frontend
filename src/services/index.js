@@ -9,6 +9,8 @@ export const authService = {
   updateProfile: (data) => api.post('/auth/profile', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
+  forgotPassword: (data) => api.post('/auth/forgot-password', data),
+  resetPassword: (data) => api.post('/auth/reset-password', data),
 };
 
 export const productsService = {
@@ -32,6 +34,7 @@ export const cartService = {
 
 export const ordersService = {
   checkout: (data) => api.post('/orders/checkout', data),
+  createPaymentIntent: (data) => api.post('/orders/create-payment-intent', data),
   list: () => api.get('/orders'),
   detail: (id) => api.get(`/orders/${id}`),
   track: (id) => api.get(`/orders/${id}/track`),
@@ -90,4 +93,33 @@ export const adminService = {
     approve: (id) => api.patch(`/admin/reviews/${id}/approve`),
     delete: (id) => api.delete(`/admin/reviews/${id}`),
   },
+};
+
+export const adminCouponsService = {
+  getAll: () => api.get('/admin/coupons'),
+  create: (data) => api.post('/admin/coupons', data),
+  update: (id, data) => api.put(`/admin/coupons/${id}`, data),
+  delete: (id) => api.delete(`/admin/coupons/${id}`),
+  toggleActive: (id) => api.patch(`/admin/coupons/${id}/toggle`),
+};
+
+export const adminNotificationsService = {
+  getAll: () => api.get('/admin/notifications'),
+  markAsRead: (id) => api.patch(`/admin/notifications/${id}/read`),
+};
+
+export const bannersService = {
+  getAll: () => api.get('/banners'),
+};
+
+export const adminBannersService = {
+  getAll: () => api.get('/admin/banners'),
+  create: (data) => api.post('/admin/banners', data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  update: (id, data) => api.post(`/admin/banners/${id}`, data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  delete: (id) => api.delete(`/admin/banners/${id}`),
+  toggleActive: (id) => api.patch(`/admin/banners/${id}/toggle`),
 };

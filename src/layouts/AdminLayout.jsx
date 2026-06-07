@@ -13,12 +13,15 @@ import {
   Sun,
   Menu,
   X as XIcon,
+  Ticket,
+  Image as ImageIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import useThemeStore from "../store/useThemeStore";
 import { useLocaleStore } from "../store/useLocaleStore";
 import ToastProvider from "../components/ui/ToastProvider";
+import { adminNotificationsService } from "../services";
 
 const adminLinks = [
   {
@@ -27,19 +30,39 @@ const adminLinks = [
     labelKey: "admin.dashboard",
     end: true,
   },
-  { to: "/admin/orders",     icon: ShoppingCart, labelKey: "admin.all_orders" },
-  { to: "/admin/products",   icon: Package,      labelKey: "admin.add_product" },
-  { to: "/admin/categories", icon: Tag,          labelKey: "common.categories" },
-  { to: "/admin/reviews",    icon: Star,         labelKey: "admin.reviews" },
-  { to: "/",                 icon: Store,        labelKey: "admin.store" },
+  { to: "/admin/orders", icon: ShoppingCart, labelKey: "admin.all_orders" },
+  { to: "/admin/products", icon: Package, labelKey: "admin.add_product" },
+  { to: "/admin/categories", icon: Tag, labelKey: "common.categories" },
+  { to: "/admin/coupons", icon: Ticket, labelKey: "admin.coupons" },
+  { to: "/admin/reviews", icon: Star, labelKey: "admin.reviews" },
+  { to: "/admin/banners", icon: ImageIcon, labelKey: "admin.banners" },
+  { to: "/", icon: Store, labelKey: "admin.store" },
 ];
 
 const PAGE_TITLES = {
-  "/admin":            { ar: "لوحة التحكم",   en: "Dashboard",   fr: "Tableau de Bord" },
-  "/admin/orders":     { ar: "إدارة الطلبات",  en: "Orders",      fr: "Commandes" },
-  "/admin/products":   { ar: "إدارة المنتجات", en: "Products",    fr: "Produits" },
-  "/admin/categories": { ar: "إدارة الأقسام",  en: "Categories",  fr: "Catégories" },
-  "/admin/reviews":    { ar: "التقييمات",       en: "Reviews",     fr: "Avis" },
+  "/admin": { ar: "لوحة التحكم", en: "Dashboard", fr: "Tableau de Bord" },
+  "/admin/orders": { ar: "إدارة الطلبات", en: "Orders", fr: "Commandes" },
+  "/admin/products": { ar: "إدارة المنتجات", en: "Products", fr: "Produits" },
+  "/admin/categories": { ar: "إدارة الأقسام", en: "Categories", fr: "Catégories" },
+  "/admin/coupons": { ar: "إدارة الكوبونات", en: "Coupons", fr: "Coupons" },
+  "/admin/reviews": { ar: "التقييمات", en: "Reviews", fr: "Avis" },
+  "/admin/banners": { ar: "البنرات الإعلانية", en: "Banners", fr: "Bannières" },
+};
+
+const formatTimeAgo = (dateString, lang) => {
+  const date = new Date(dateString);
+  const seconds = Math.floor((new Date() - date) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return lang === "ar" ? "منذ أكثر من سنة" : lang === "fr" ? "il y a plus d'un an" : "more than a year ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return lang === "ar" ? `منذ ${Math.floor(interval)} شهر` : lang === "fr" ? `il y a ${Math.floor(interval)} mois` : `${Math.floor(interval)} months ago`;
+  interval = seconds / 86400;
+  if (interval > 1) return lang === "ar" ? `منذ ${Math.floor(interval)} يوم` : lang === "fr" ? `il y a ${Math.floor(interval)} jours` : `${Math.floor(interval)} days ago`;
+  interval = seconds / 3600;
+  if (interval > 1) return lang === "ar" ? `منذ ${Math.floor(interval)} ساعة` : lang === "fr" ? `il y a ${Math.floor(interval)} heures` : `${Math.floor(interval)} hours ago`;
+  interval = seconds / 60;
+  if (interval > 1) return lang === "ar" ? `منذ ${Math.floor(interval)} دقيقة` : lang === "fr" ? `il y a ${Math.floor(interval)} min` : `${Math.floor(interval)} mins ago`;
+  return lang === "ar" ? "الآن" : lang === "fr" ? "à l'instant" : "just now";
 };
 
 export default function AdminLayout() {
@@ -51,6 +74,29 @@ export default function AdminLayout() {
   const location = useLocation();
   const isAr = language === "ar";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const notifRef = useRef(null);
+
+  const fetchNotifications = async () => {
+    try {
+      const { data } = await adminNotificationsService.getAll();
+      setNotifications(data);
+    } catch (error) {
+      console.error("Failed to load notifications", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -79,12 +125,14 @@ export default function AdminLayout() {
       {/* ── Sidebar ──────────────────────────────────────── */}
       <aside
         className={`
-          w-64 shrink-0 flex flex-col fixed h-full z-40
+          w-64 shrink-0 flex flex-col fixed top-0 start-0 h-full z-40 shadow-2xl lg:shadow-none
           bg-white dark:bg-gray-900
           border-e border-gray-200 dark:border-gray-800
-          transition-all duration-300
+          transition-transform duration-300 ease-in-out
           lg:translate-x-0
-          ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+          ${mobileMenuOpen 
+            ? "translate-x-0" 
+            : isAr ? "translate-x-full" : "-translate-x-full"}
         `}
       >
         {/* Logo */}
@@ -109,11 +157,10 @@ export default function AdminLayout() {
               end={end}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-                 ${
-                   isActive
-                     ? "bg-primary text-white shadow-sm"
-                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-                 }`
+                 ${isActive
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                }`
               }
             >
               <LinkIcon size={18} />
@@ -223,15 +270,89 @@ export default function AdminLayout() {
 
           <div className="flex items-center gap-2">
             {/* Bell */}
-            <button
-              type="button"
-              className="relative p-2 rounded-xl text-gray-500 dark:text-gray-400
-                         hover:bg-gray-100 dark:hover:bg-gray-800
-                         hover:text-gray-900 dark:hover:text-white transition-all"
-            >
-              <Bell size={20} />
-              <span className="absolute top-1.5 end-1.5 w-2 h-2 bg-primary rounded-full" />
-            </button>
+            <div className="relative" ref={notifRef}>
+              <button
+                type="button"
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 rounded-xl text-gray-500 dark:text-gray-400
+                           hover:bg-gray-100 dark:hover:bg-gray-800
+                           hover:text-gray-900 dark:hover:text-white transition-all"
+              >
+                <Bell size={20} />
+                {notifications.filter(n => !n.read_at).length > 0 && (
+                  <span className="absolute top-1.5 end-1.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
+                )}
+              </button>
+
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <div className="absolute end-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-slide-down">
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+                    <h3 className="font-bold text-gray-900 dark:text-white">
+                      {t("admin.notifications") || (isAr ? "الإشعارات" : "Notifications")}
+                    </h3>
+                    <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-bold tracking-wide">
+                      {notifications.filter(n => !n.read_at).length} {isAr ? "جديد" : "New"}
+                    </span>
+                  </div>
+                  <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-80 overflow-y-auto custom-scrollbar">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">
+                        {isAr ? "لا توجد إشعارات جديدة" : "No new notifications"}
+                      </div>
+                    ) : (
+                      notifications.map((notification) => {
+                        const isRead = !!notification.read_at;
+
+                        return (
+                          <div
+                            key={notification.id}
+                            onClick={async () => {
+                              if (!isRead) {
+                                await adminNotificationsService.markAsRead(notification.id);
+                                fetchNotifications();
+                              }
+                              navigate(`/admin/orders`);
+                            }}
+                            className={`p-4 transition-colors cursor-pointer relative ${isRead ? "bg-white dark:bg-gray-800" : "bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              }`}
+                          >
+                            {!isRead && (
+                              <div className="absolute top-5 start-4 w-2 h-2 bg-primary rounded-full" />
+                            )}
+                            <div className="ms-5">
+                              <p className={`text-sm font-semibold mb-0.5 ${isRead ? "text-gray-700 dark:text-gray-300" : "text-gray-900 dark:text-white"}`}>
+                                {isAr ? notification.data.message_ar : notification.data.message_en}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                                {isAr ? notification.data.desc_ar : notification.data.desc_en}
+                              </p>
+                              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5 font-bold uppercase tracking-wider">
+                                {formatTimeAgo(notification.created_at, language)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                  <div className="p-2 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-700">
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        await adminNotificationsService.markAsRead('all');
+                        await fetchNotifications();
+                        setShowNotifications(false);
+                      }}
+                      className="w-full text-center text-xs font-bold text-primary hover:text-primary-hover transition-colors py-2 rounded-lg hover:bg-primary/5"
+                    >
+                      {isAr ? "مسح كل الإشعارات" : "Clear all notifications"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

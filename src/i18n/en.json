@@ -105,7 +105,7 @@
     "empty_cart": "Your cart is empty",
     "shop_now": "Shop Now",
     "address_placeholder": "45 Main Street",
-    "city_placeholder": "Cairo",
+    "city_placeholder": "enter your city",
     "notes_placeholder": "Any delivery notes...",
     "name_placeholder": "John Doe"
   },
@@ -194,7 +194,9 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "notifications": "Notifications",
-    "reviews": "Reviews"
+    "reviews": "Reviews",
+    "coupons": "Coupons",
+    "banners": "Banners"
   },
   "footer": {
     "about_us": "Learn More About Us",

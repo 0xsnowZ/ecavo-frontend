@@ -42,7 +42,11 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
-  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedVariants, setSelectedVariants] = useState({});
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedStorage, setSelectedStorage] = useState(null);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState("description"); // description | specifications | reviews
   const [addedToCart, setAddedToCart] = useState(false);
@@ -55,7 +59,19 @@ export default function ProductDetail() {
         const p = r.data.data;
         setProduct(p);
         // Auto-select first variant if exists
-        if (p.variants?.length > 0) setSelectedVariant(p.variants[0]);
+        if (p.variants?.length > 0) {
+            const defaults = {};
+            p.variants.forEach(v => {
+                if (!defaults[v.attribute]) defaults[v.attribute] = v;
+            });
+            setSelectedVariants(defaults);
+        }
+        
+        // Auto-select first specs if available
+        if (p.specifications?.colors) setSelectedColor(p.specifications.colors.split(',').map(s=>s.trim())[0]);
+        if (p.specifications?.sizes) setSelectedSize(p.specifications.sizes.split(',').map(s=>s.trim())[0]);
+        if (p.specifications?.storage) setSelectedStorage(p.specifications.storage.split(',').map(s=>s.trim())[0]);
+        if (p.specifications?.material) setSelectedMaterial(p.specifications.material.split(',').map(s=>s.trim())[0]);
 
         // ── Track recently viewed ────────────────────────────────────────
         // Always push to localStorage (works for guests and logged-in users)
@@ -80,9 +96,8 @@ export default function ProductDetail() {
 
   const name = getLocalized(product, "name", i18n.language);
   const description = getLocalized(product, "description", i18n.language);
-  const basePrice =
-    parseFloat(product.price) +
-    (selectedVariant ? parseFloat(selectedVariant.extra_price) : 0);
+  const extraPriceSum = Object.values(selectedVariants).reduce((sum, v) => sum + parseFloat(v.extra_price || 0), 0);
+  const basePrice = parseFloat(product.price) + extraPriceSum;
   const displayPrice = `${currency.symbol}${(basePrice * currency.rate).toFixed(2)}`;
   const displayOriginal = product.original_price
     ? `${currency.symbol}${(parseFloat(product.original_price) * currency.rate).toFixed(2)}`
@@ -91,7 +106,31 @@ export default function ProductDetail() {
   const images = resolveImages(product.images, "/placeholder.jpg");
 
   const handleAddToCart = () => {
-    addItem({ ...product, price: basePrice }, qty, selectedVariant);
+    let customVariant = null;
+    
+    if (Object.keys(selectedVariants).length > 0) {
+       const labels = Object.values(selectedVariants).map(v => v.value);
+       const ids = Object.values(selectedVariants).map(v => v.id).join('-');
+       customVariant = {
+          id: `var-${ids}`,
+          value: labels.join(' / '),
+          extra_price: extraPriceSum
+       };
+    } else if (selectedColor || selectedSize || selectedStorage || selectedMaterial) {
+       // If no explicit variant but we have specs selected, create synthetic variant
+       const labels = [];
+       if (selectedColor) labels.push(selectedColor);
+       if (selectedSize) labels.push(selectedSize);
+       if (selectedStorage) labels.push(selectedStorage);
+       if (selectedMaterial) labels.push(selectedMaterial);
+       customVariant = {
+          id: `opt-${selectedColor||'x'}-${selectedSize||'x'}-${selectedStorage||'x'}-${selectedMaterial||'x'}`,
+          value: labels.join(' / '),
+          extra_price: 0
+       };
+    }
+
+    addItem({ ...product, price: basePrice }, qty, customVariant);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
@@ -123,7 +162,7 @@ export default function ProductDetail() {
     }, {}) ?? {};
 
   return (
-    <div className="container-main py-8">
+    <div className="container-main py-8 pb-24 sm:pb-8">
       {/* Breadcrumb */}
       <nav className="text-xs text-muted mb-6 flex items-center gap-2">
         <Link to="/" className="hover:text-primary">
@@ -253,16 +292,16 @@ export default function ProductDetail() {
             <div key={attribute}>
               <p className="text-sm font-semibold text-dark mb-2 capitalize">
                 {attribute}:{" "}
-                <span className="text-primary">{selectedVariant?.value}</span>
+                <span className="text-primary">{selectedVariants[attribute]?.value}</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {variants.map((v) => (
                   <button
                     key={v.id}
-                    onClick={() => setSelectedVariant(v)}
+                    onClick={() => setSelectedVariants(prev => ({ ...prev, [attribute]: v }))}
                     className={`px-4 py-1.5 rounded-lg border-2 text-sm font-medium transition-all
                       ${
-                        selectedVariant?.id === v.id
+                        selectedVariants[attribute]?.id === v.id
                           ? "border-primary bg-primary/10 text-primary"
                           : "border-border text-dark hover:border-primary"
                       }`}
@@ -275,6 +314,110 @@ export default function ProductDetail() {
               </div>
             </div>
           ))}
+
+          {/* Color Selection */}
+          {product.specifications?.colors && (
+            <div>
+              <p className="text-sm font-semibold text-dark mb-2">
+                {isAr ? "اللون" : "Color"}:{" "}
+                <span className="text-primary">{selectedColor}</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {product.specifications.colors.split(',').map(s=>s.trim()).filter(Boolean).map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`px-4 py-1.5 rounded-lg border-2 text-sm font-medium transition-all
+                      ${
+                        selectedColor === color
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-dark hover:border-primary"
+                      }`}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Size Selection */}
+          {product.specifications?.sizes && (
+            <div>
+              <p className="text-sm font-semibold text-dark mb-2">
+                {isAr ? "المقاس" : "Size"}:{" "}
+                <span className="text-primary">{selectedSize}</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {product.specifications.sizes.split(',').map(s=>s.trim()).filter(Boolean).map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-4 py-1.5 rounded-lg border-2 text-sm font-medium transition-all
+                      ${
+                        selectedSize === size
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-dark hover:border-primary"
+                      }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Storage Selection */}
+          {product.specifications?.storage && (
+            <div>
+              <p className="text-sm font-semibold text-dark mb-2">
+                {isAr ? "السعة" : "Storage"}:{" "}
+                <span className="text-primary">{selectedStorage}</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {product.specifications.storage.split(',').map(s=>s.trim()).filter(Boolean).map((storage) => (
+                  <button
+                    key={storage}
+                    onClick={() => setSelectedStorage(storage)}
+                    className={`px-4 py-1.5 rounded-lg border-2 text-sm font-medium transition-all
+                      ${
+                        selectedStorage === storage
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-dark hover:border-primary"
+                      }`}
+                  >
+                    {storage}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Material Selection */}
+          {product.specifications?.material && (
+            <div>
+              <p className="text-sm font-semibold text-dark mb-2">
+                {isAr ? "الخامة" : "Material"}:{" "}
+                <span className="text-primary">{selectedMaterial}</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {product.specifications.material.split(',').map(s=>s.trim()).filter(Boolean).map((mat) => (
+                  <button
+                    key={mat}
+                    onClick={() => setSelectedMaterial(mat)}
+                    className={`px-4 py-1.5 rounded-lg border-2 text-sm font-medium transition-all
+                      ${
+                        selectedMaterial === mat
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-dark hover:border-primary"
+                      }`}
+                  >
+                    {mat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Actions: Qty, Add to Cart, Wishlist, Share */}
           <div className="flex flex-wrap items-center gap-3">
@@ -414,17 +557,17 @@ export default function ProductDetail() {
 
           {activeTab === "specifications" && (
             <div className="max-w-xl">
-              {product.specifications?.length > 0 ? (
+              {product.specifications && Object.keys(product.specifications).length > 0 ? (
                 <table className="w-full text-sm">
                   <tbody>
-                    {product.specifications.map((spec, i) => (
+                    {Object.entries(product.specifications).map(([key, val], i) => val ? (
                       <tr key={i} className={i % 2 === 0 ? "bg-surface" : ""}>
-                        <td className="py-2 px-4 font-semibold text-secondary w-40">
-                          {spec.label}
+                        <td className="py-2 px-4 font-semibold text-secondary w-40 capitalize">
+                          {key}
                         </td>
-                        <td className="py-2 px-4 text-dark">{spec.value}</td>
+                        <td className="py-2 px-4 text-dark">{val}</td>
                       </tr>
-                    ))}
+                    ) : null)}
                   </tbody>
                 </table>
               ) : (
@@ -462,6 +605,41 @@ export default function ProductDetail() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Sticky Bottom Add to Cart Bar (Mobile Only) */}
+      <div className="sm:hidden fixed bottom-0 start-0 end-0 bg-white border-t border-border p-3 flex gap-3 items-center z-40 shadow-lg">
+        {/* Quantity (compacted) */}
+        <div className="flex items-center border border-border rounded-xl overflow-hidden bg-white shrink-0">
+          <button
+            onClick={() => setQty((q) => Math.max(1, q - 1))}
+            className="p-2.5 hover:bg-gray-100 transition-colors text-muted hover:text-dark"
+          >
+            <Minus size={14} />
+          </button>
+          <span className="w-6 text-center font-bold text-dark text-sm">{qty}</span>
+          <button
+            onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
+            className="p-2.5 hover:bg-gray-100 transition-colors text-muted hover:text-dark"
+          >
+            <Plus size={14} />
+          </button>
+        </div>
+
+        {/* Add to Cart */}
+        <button
+          onClick={handleAddToCart}
+          disabled={product.stock === 0}
+          className={`btn-primary flex-1 justify-center py-2.5 text-sm transition-all
+            ${addedToCart ? "bg-green-500 hover:bg-green-600" : ""}`}
+        >
+          <ShoppingCart size={16} />
+          {addedToCart
+            ? isAr
+              ? "✓ تمت الإضافة!"
+              : "✓ Added!"
+            : t("products.add_to_cart")}
+        </button>
       </div>
     </div>
   );

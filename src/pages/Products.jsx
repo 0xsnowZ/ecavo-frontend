@@ -167,7 +167,7 @@ export default function Products() {
                 {/* Mobile filter button */}
                 <button
                   onClick={() => setFiltersOpen(true)}
-                  className="lg:hidden btn-ghost text-sm py-2 border border-border"
+                  className="lg:hidden btn-ghost text-sm py-2.5 px-4 border border-border"
                 >
                   <SlidersHorizontal size={16} />
                   {isAr ? 'فلتر' : 'Filter'}
@@ -225,7 +225,7 @@ export default function Products() {
 
             {/* Pagination */}
             {meta.last_page > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-8">
+              <div className="flex items-center justify-center gap-1.5 mt-8 flex-wrap">
                 <button
                   disabled={page <= 1}
                   onClick={() => setParam('page', page - 1)}
@@ -233,16 +233,34 @@ export default function Products() {
                 >
                   <ChevronLeft size={18} className="rtl-flip" />
                 </button>
-                {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(p => (
-                  <button
-                    key={p}
-                    onClick={() => setParam('page', p)}
-                    className={`w-9 h-9 rounded-lg text-sm font-semibold transition-colors
-                    ${p === page ? 'bg-primary text-white' : 'text-muted hover:bg-gray-100'}`}
-                  >
-                    {p}
-                  </button>
-                ))}
+                {(() => {
+                  const pages = [];
+                  const total = meta.last_page;
+                  const delta = 1; // pages shown around current
+                  const range = [];
+                  for (let i = Math.max(2, page - delta); i <= Math.min(total - 1, page + delta); i++) {
+                    range.push(i);
+                  }
+                  if (range[0] > 2) range.unshift('...');
+                  if (range[range.length - 1] < total - 1) range.push('...');
+                  pages.push(1);
+                  pages.push(...range);
+                  if (total > 1) pages.push(total);
+                  return pages.map((p, i) =>
+                    p === '...' ? (
+                      <span key={`dots-${i}`} className="px-1 text-muted text-sm">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => setParam('page', p)}
+                        className={`w-9 h-9 rounded-lg text-sm font-semibold transition-colors
+                        ${p === page ? 'bg-primary text-white' : 'text-muted hover:bg-gray-100'}`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  );
+                })()}
                 <button
                   disabled={page >= meta.last_page}
                   onClick={() => setParam('page', page + 1)}

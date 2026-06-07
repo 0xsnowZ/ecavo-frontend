@@ -182,7 +182,9 @@
     "cancel": "إلغاء",
     "delete": "حذف",
     "notifications": "الإشعارات",
-    "reviews": "التقييمات"
+    "reviews": "التقييمات",
+    "coupons": "الكوبونات",
+    "banners": "البنرات الإعلانية"
   },
   "footer": {
     "about_us": "اعرف المزيد عنا",

@@ -1,5 +1,7 @@
 import { useLocaleStore } from "../../../store/useLocaleStore";
-import { useEffect, useState, useCallback } from "react";
+import useThemeStore from "../../../store/useThemeStore";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import {
   Plus,
@@ -9,7 +11,7 @@ import {
   X,
   Loader2,
   RefreshCw,
-  Image,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminService, categoriesService } from "../../../services";
@@ -35,12 +37,20 @@ const EMPTY_FORM = {
   is_featured: false,
   deal_ends_at: "",
   images: [],
+  colors: "",
+  sizes: "",
+  storage: "",
+  material: "",
+  has_variants: false,
+  variants: [],
 };
 
 export default function ProductsPage() {
   const { t, i18n } = useTranslation();
   const { language } = useLocaleStore();
+  const { dark } = useThemeStore();
   const isAr = language === "ar";
+  const isFr = language === "fr";
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -104,6 +114,12 @@ export default function ProductsPage() {
         ? product.deal_ends_at.split("T")[0]
         : "",
       images: product.images || [],
+      colors: product.specifications?.colors || "",
+      sizes: product.specifications?.sizes || "",
+      storage: product.specifications?.storage || "",
+      material: product.specifications?.material || "",
+      has_variants: product.variants?.length > 0,
+      variants: product.variants || [],
     });
     setErrors({});
     setEdit(product);
@@ -114,14 +130,45 @@ export default function ProductsPage() {
     setSaving(true);
     setErrors({});
     try {
+      const payload = { ...form };
+      
+      const selectedCat = categories.find((c) => c.id == payload.category_id);
+      const catSlug = selectedCat?.slug || selectedCat?.name_en?.toLowerCase() || "";
+      const hasColors = ["clothes", "shoes", "mobiles", "furniture", "accessories"].includes(catSlug);
+      const hasSizes = ["clothes", "shoes"].includes(catSlug);
+      const hasStorage = ["mobiles"].includes(catSlug);
+      const hasMaterial = ["furniture"].includes(catSlug);
+      
+      if (payload.has_variants) {
+        payload.specifications = null;
+        // Keep payload.variants as is
+      } else {
+        payload.variants = [];
+        if (hasColors || hasSizes || hasStorage || hasMaterial) {
+          payload.specifications = {};
+          if (hasColors && payload.colors) payload.specifications.colors = payload.colors;
+          if (hasSizes && payload.sizes) payload.specifications.sizes = payload.sizes;
+          if (hasStorage && payload.storage) payload.specifications.storage = payload.storage;
+          if (hasMaterial && payload.material) payload.specifications.material = payload.material;
+        } else {
+          payload.specifications = null;
+        }
+      }
+      
+      delete payload.colors;
+      delete payload.sizes;
+      delete payload.storage;
+      delete payload.material;
+      delete payload.has_variants;
+
       if (modal === "create") {
-        await adminService.products.create(form);
+        await adminService.products.create(payload);
         toast.success(
           isAr ? "تم إنشاء المنتج بنجاح ✓" : "Product created successfully",
           { description: form.name_en || form.name_ar },
         );
       } else {
-        await adminService.products.update(editProduct.id, form);
+        await adminService.products.update(editProduct.id, payload);
         toast.success(
           isAr ? "تم تحديث المنتج بنجاح ✓" : "Product updated successfully",
           { description: form.name_en || form.name_ar },
@@ -162,7 +209,20 @@ export default function ProductsPage() {
   };
 
   const setField = (k, v) => {
-    setForm((f) => ({ ...f, [k]: v }));
+    setForm((f) => {
+      const updated = { ...f, [k]: v };
+      // Auto-recalculate discount % when price or original_price changes
+      if (k === 'price' || k === 'original_price') {
+        const price = parseFloat(k === 'price' ? v : updated.price);
+        const original = parseFloat(k === 'original_price' ? v : updated.original_price);
+        if (original > 0 && price > 0 && original > price) {
+          updated.discount_percent = Math.round(((original - price) / original) * 100);
+        } else {
+          updated.discount_percent = '';
+        }
+      }
+      return updated;
+    });
     setErrors((e) => ({ ...e, [k]: null }));
   };
 
@@ -374,9 +434,10 @@ export default function ProductsPage() {
           </div>
 
           {/* Create/Edit Modal */}
-          {modal && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-down">
+          {modal && createPortal(
+            <div className={dark ? "dark" : ""}>
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-down">
                 <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-border dark:border-gray-700 px-6 py-4 flex items-center justify-between">
                   <h3 className="font-bold text-secondary dark:text-white">
                     {modal === "create"
@@ -463,7 +524,7 @@ export default function ProductsPage() {
                   </div>
 
                   {/* Price, Stock, Category */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-4 gap-4">
                     {[
                       {
                         key: "price",
@@ -473,6 +534,11 @@ export default function ProductsPage() {
                       {
                         key: "original_price",
                         label: isAr ? "السعر الأصلي" : "Original $",
+                        type: "number",
+                      },
+                      {
+                        key: "discount_percent",
+                        label: isAr ? "الخصم %" : "Discount %",
                         type: "number",
                       },
                       {
@@ -515,6 +581,166 @@ export default function ProductsPage() {
                       ))}
                     </select>
                   </div>
+
+                  {/* Variants Checkbox */}
+                  <div>
+                    <label className="flex items-center gap-2 cursor-pointer mb-2">
+                      <input
+                        type="checkbox"
+                        checked={form.has_variants}
+                        onChange={(e) => setField("has_variants", e.target.checked)}
+                        className="w-4 h-4 accent-primary"
+                      />
+                      <span className="text-sm font-semibold text-dark dark:text-gray-100">
+                        {isAr ? "المنتج يحتوي على متغيرات بأسعار مختلفة (مثال: سعات تخزين، مقاسات)" : "Product has variations with different prices (e.g. Storage, Sizes)"}
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Advanced Variants Builder OR Simple Specifications */}
+                  {form.has_variants ? (
+                    <div className="space-y-3 border border-border dark:border-gray-700 p-4 rounded-xl bg-gray-50/50 dark:bg-gray-700/30">
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-xs font-semibold text-muted dark:text-gray-400 uppercase tracking-wider">
+                          {isAr ? "إدارة المتغيرات" : "Manage Variations"}
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setField("variants", [...form.variants, { attribute: 'Storage', value: '', extra_price: 0, stock: 10 }])}
+                          className="text-xs flex items-center gap-1 text-primary font-medium bg-primary/10 px-2 py-1 rounded hover:bg-primary/20 transition-colors"
+                        >
+                          <Plus size={14} /> {isAr ? "إضافة متغير" : "Add Variant"}
+                        </button>
+                      </div>
+                      
+                      {form.variants.map((v, i) => (
+                        <div key={i} className="flex flex-wrap items-end gap-2 bg-white dark:bg-gray-800 p-2 rounded-lg border border-border dark:border-gray-600 shadow-sm">
+                          <div className="flex-1 min-w-[100px]">
+                            <label className="block text-[10px] text-muted dark:text-gray-400 mb-1">{isAr ? "النوع" : "Attribute"}</label>
+                            <select
+                              value={v.attribute}
+                              onChange={(e) => {
+                                const newVariants = [...form.variants];
+                                newVariants[i].attribute = e.target.value;
+                                setField("variants", newVariants);
+                              }}
+                              className="input-field py-1.5 text-sm"
+                            >
+                              <option value="Storage">Storage</option>
+                              <option value="Color">Color</option>
+                              <option value="Size">Size</option>
+                              <option value="Material">Material</option>
+                            </select>
+                          </div>
+                          <div className="flex-1 min-w-[100px]">
+                            <label className="block text-[10px] text-muted dark:text-gray-400 mb-1">{isAr ? "القيمة (مثال: 128GB)" : "Value (e.g. 128GB)"}</label>
+                            <input
+                              type="text"
+                              value={v.value}
+                              onChange={(e) => {
+                                const newVariants = [...form.variants];
+                                newVariants[i].value = e.target.value;
+                                setField("variants", newVariants);
+                              }}
+                              className="input-field py-1.5 text-sm"
+                            />
+                          </div>
+                          <div className="w-24">
+                            <label className="block text-[10px] text-muted dark:text-gray-400 mb-1">{isAr ? "سعر إضافي" : "Extra Price"}</label>
+                            <input
+                              type="number"
+                              value={v.extra_price}
+                              onChange={(e) => {
+                                const newVariants = [...form.variants];
+                                newVariants[i].extra_price = parseFloat(e.target.value) || 0;
+                                setField("variants", newVariants);
+                              }}
+                              className="input-field py-1.5 text-sm"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setField("variants", form.variants.filter((_, idx) => idx !== i))}
+                            className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                      {form.variants.length === 0 && (
+                        <p className="text-xs text-muted dark:text-gray-500 text-center py-2">{isAr ? "لم يتم إضافة أي متغيرات بعد." : "No variants added yet."}</p>
+                      )}
+                    </div>
+                  ) : (() => {
+                    const selectedCat = categories.find((c) => c.id == form.category_id);
+                    const catSlug = selectedCat?.slug || selectedCat?.name_en?.toLowerCase() || "";
+                    const hasColors = ["clothes", "shoes", "mobiles", "furniture", "accessories"].includes(catSlug);
+                    const hasSizes = ["clothes", "shoes"].includes(catSlug);
+                    const hasStorage = ["mobiles"].includes(catSlug);
+                    const hasMaterial = ["furniture"].includes(catSlug);
+                    
+                    if (!hasColors && !hasSizes && !hasStorage && !hasMaterial) return null;
+                    return (
+                      <div className="grid grid-cols-2 gap-4 border border-border p-4 rounded-xl bg-gray-50/50">
+                        {hasColors && (
+                          <div>
+                            <label className="block text-xs font-semibold text-muted mb-1">
+                              {isAr ? "الألوان (مفصولة بفاصلة)" : "Colors (comma separated)"}
+                            </label>
+                            <input
+                              type="text"
+                              value={form.colors}
+                              onChange={(e) => setField("colors", e.target.value)}
+                              className="input-field"
+                              placeholder={isAr ? "أحمر, أزرق, أسود" : "Red, Blue, Black"}
+                            />
+                          </div>
+                        )}
+                        {hasSizes && (
+                          <div>
+                            <label className="block text-xs font-semibold text-muted mb-1">
+                              {isAr ? "المقاسات (مفصولة بفاصلة)" : "Sizes (comma separated)"}
+                            </label>
+                            <input
+                              type="text"
+                              value={form.sizes}
+                              onChange={(e) => setField("sizes", e.target.value)}
+                              className="input-field"
+                              placeholder={catSlug === "shoes" ? "38, 39, 40, 41" : "S, M, L, XL"}
+                            />
+                          </div>
+                        )}
+                        {hasStorage && (
+                          <div>
+                            <label className="block text-xs font-semibold text-muted mb-1">
+                              {isAr ? "السعة التخزينية (مفصولة بفاصلة)" : "Storage (comma separated)"}
+                            </label>
+                            <input
+                              type="text"
+                              value={form.storage}
+                              onChange={(e) => setField("storage", e.target.value)}
+                              className="input-field"
+                              placeholder="64GB, 128GB, 256GB"
+                            />
+                          </div>
+                        )}
+                        {hasMaterial && (
+                          <div>
+                            <label className="block text-xs font-semibold text-muted mb-1">
+                              {isAr ? "الخامات (مفصولة بفاصلة)" : "Material (comma separated)"}
+                            </label>
+                            <input
+                              type="text"
+                              value={form.material}
+                              onChange={(e) => setField("material", e.target.value)}
+                              className="input-field"
+                              placeholder={isAr ? "خشب, جلد, قماش" : "Wood, Leather, Fabric"}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Toggles */}
                   <div className="flex items-center gap-6">
@@ -560,7 +786,7 @@ export default function ProductsPage() {
                   {/* ── Image Upload ── */}
                   <div>
                     <label className="block text-xs font-semibold text-muted mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                      <Image size={13} />
+                      <ImageIcon size={13} />
                       {isAr ? "صور المنتج" : "Product Images"}
                       <span className="ms-auto font-normal normal-case">
                         {isAr
@@ -599,12 +825,15 @@ export default function ProductsPage() {
                 </div>
               </div>
             </div>
+            </div>,
+            document.body
           )}
 
           {/* Delete confirmation */}
-          {deleting && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 animate-fade-in">
+          {deleting && createPortal(
+            <div className={dark ? "dark" : ""}>
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 animate-fade-in">
                 <p className="text-2xl">🗑️</p>
                 <p className="font-bold text-secondary dark:text-white">
                   {isAr ? "هل أنت متأكد من الحذف؟" : "Confirm Delete?"}
@@ -630,6 +859,8 @@ export default function ProductsPage() {
                 </div>
               </div>
             </div>
+            </div>,
+            document.body
           )}
         </>
       )}

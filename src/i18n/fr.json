@@ -194,7 +194,9 @@
     "cancel": "Annuler",
     "delete": "Supprimer",
     "notifications": "Notifications",
-    "reviews": "Avis"
+    "reviews": "Avis",
+    "coupons": "Coupons",
+    "banners": "Bannières"
   },
   "footer": {
     "about_us": "En Savoir Plus Sur Nous",

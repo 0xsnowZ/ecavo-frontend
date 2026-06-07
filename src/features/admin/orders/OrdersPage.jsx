@@ -1,5 +1,7 @@
 import { useLocaleStore } from "../../../store/useLocaleStore";
+import useThemeStore from "../../../store/useThemeStore";
 import { useEffect, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Search, RefreshCw, ChevronDown, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -77,6 +79,7 @@ const STATUS_COLOR = {
 export default function OrdersPage() {
   const { t, i18n } = useTranslation();
   const { language } = useLocaleStore();
+  const { dark } = useThemeStore();
   const isAr = language === "ar";
   const isFr = language === "fr";
 
@@ -380,8 +383,9 @@ export default function OrdersPage() {
           </div>
 
           {/* Status Update Modal */}
-          {editOrder && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          {editOrder && createPortal(
+            <div className={dark ? "dark" : ""}>
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-slide-down">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-secondary dark:text-white">
@@ -461,6 +465,8 @@ export default function OrdersPage() {
                 </div>
               </div>
             </div>
+            </div>,
+            document.body
           )}
         </>
       )}

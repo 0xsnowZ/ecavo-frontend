@@ -209,77 +209,22 @@ export default function DashboardPage() {
         setStats(r.data.stats);
         setRecent(r.data.recent_orders || []);
 
-        // Generate revenue trend data (last 7 days)
-        const last7Days = Array.from({ length: 7 }, (_, i) => {
-          const date = new Date();
-          date.setDate(date.getDate() - (6 - i));
-          return date;
-        });
-
-        const trendData = last7Days.map((date) => {
+        // Parse the dynamic revenue trend data from API
+        const realTrendData = (r.data.revenue_trend || []).map((item) => {
+          const date = new Date(item.date);
           const dayName = date.toLocaleDateString(
             language === "ar" ? "ar-EG" : language === "fr" ? "fr-FR" : "en-US",
             { weekday: "short" },
           );
-          const dayOrders = Math.floor(Math.random() * 15) + 5;
-          const dayRevenue = dayOrders * (Math.random() * 50 + 30);
           return {
             name: dayName,
-            orders: dayOrders,
-            revenue: Math.round(dayRevenue),
+            orders: item.orders,
+            revenue: Math.round(item.revenue), // Round to nearest int for chart display
           };
         });
-        setRevenueData(trendData);
+        setRevenueData(realTrendData);
 
-        // Generate mock top products (replace with API when available)
-        const mockProducts = [
-          {
-            id: 1,
-            nameAr: "منتج أيفون 15 برو",
-            nameEn: "iPhone 15 Pro",
-            nameFr: "iPhone 15 Pro",
-            sales: 45,
-            revenue: 54000,
-            image: null,
-          },
-          {
-            id: 2,
-            nameAr: "سامسونج جالكسي S24",
-            nameEn: "Samsung Galaxy S24",
-            nameFr: "Samsung Galaxy S24",
-            sales: 38,
-            revenue: 38000,
-            image: null,
-          },
-          {
-            id: 3,
-            nameAr: "سماعات ايربودز برو",
-            nameEn: "AirPods Pro",
-            nameFr: "AirPods Pro",
-            sales: 62,
-            revenue: 18600,
-            image: null,
-          },
-          {
-            id: 4,
-            nameAr: "ماك بوك اير M3",
-            nameEn: "MacBook Air M3",
-            nameFr: "MacBook Air M3",
-            sales: 23,
-            revenue: 46000,
-            image: null,
-          },
-          {
-            id: 5,
-            nameAr: "آيباد اير 2024",
-            nameEn: "iPad Air 2024",
-            nameFr: "iPad Air 2024",
-            sales: 31,
-            revenue: 24800,
-            image: null,
-          },
-        ];
-        setTopProducts(mockProducts);
+        setTopProducts(r.data.top_products || []);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -410,8 +355,8 @@ export default function DashboardPage() {
             isAr ? "قيد المعالجة" : isFr ? "En traitement" : "Pending Orders"
           }
           value={stats?.by_status?.placed || 0}
-          trend="+3"
-          trendUp={true}
+          trend={stats?.trends?.placed > 0 ? `+${stats.trends.placed}` : (stats?.trends?.placed || 0).toString()}
+          trendUp={(stats?.trends?.placed || 0) >= 0}
           color="bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400"
         />
         <QuickStatCard
@@ -421,8 +366,8 @@ export default function DashboardPage() {
             (stats?.by_status?.shipped || 0) +
             (stats?.by_status?.in_transit || 0)
           }
-          trend="-2"
-          trendUp={false}
+          trend={stats?.trends?.shipping > 0 ? `+${stats.trends.shipping}` : (stats?.trends?.shipping || 0).toString()}
+          trendUp={(stats?.trends?.shipping || 0) >= 0}
           color="bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400"
         />
         <QuickStatCard
@@ -432,15 +377,15 @@ export default function DashboardPage() {
             (stats?.by_status?.cancelled || 0) +
             (stats?.by_status?.returned || 0)
           }
-          trend="+1"
-          trendUp={false}
+          trend={stats?.trends?.issues > 0 ? `+${stats.trends.issues}` : (stats?.trends?.issues || 0).toString()}
+          trendUp={(stats?.trends?.issues || 0) <= 0} // For issues, fewer is better!
           color="bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400"
         />
         <QuickStatCard
           icon={Star}
           label={isAr ? "متوسط التقييم" : isFr ? "Note moyenne" : "Avg Rating"}
-          value="4.8"
-          trend="+0.3"
+          value={stats?.trends?.rating ? stats.trends.rating.toFixed(1) : "0.0"}
+          trend="" // Rating trend is harder to calc, leave blank for now
           trendUp={true}
           color="bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400"
         />
