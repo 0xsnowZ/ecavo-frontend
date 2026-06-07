@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   ShoppingCart,
@@ -14,7 +14,7 @@ import {
   Plus,
   Share2,
 } from "lucide-react";
-import { productsService, recentlyViewedService } from "../services";
+import { productsService, recentlyViewedService, reviewsService } from "../services";
 import { useCartStore } from "../store/useCartStore";
 import { useWishlistStore } from "../store/useWishlistStore";
 import { useLocaleStore } from "../store/useLocaleStore";
@@ -24,6 +24,7 @@ import StarRating from "../components/ui/StarRating";
 import Spinner from "../components/ui/Spinner";
 import CountdownTimer from "../components/ui/CountdownTimer";
 import ProductCard from "../components/product/ProductCard";
+import ReviewForm from "../components/product/ReviewForm";
 import { resolveImages } from "../utils/imageUrl";
 import { resolveImageUrl } from "../utils/imageUrl";
 import { getLocalized } from "../utils/localize";
@@ -32,7 +33,10 @@ export default function ProductDetail() {
   const { slug } = useParams();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const isAr = i18n.language === "ar";
+  const isFr = i18n.language === "fr";
 
   const { currency } = useLocaleStore();
   const addItem = useCartStore((s) => s.addItem);
@@ -50,6 +54,19 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState("description"); // description | specifications | reviews
   const [addedToCart, setAddedToCart] = useState(false);
+  const [eligibleItem, setEligibleItem] = useState(null);
+  const [hasSubmittedReview, setHasSubmittedReview] = useState(false);
+
+  // Auto-switch to reviews tab if coming from "Leave a Review" button
+  useEffect(() => {
+    if (searchParams.get("review") || location.hash === "#reviews") {
+      setActiveTab("reviews");
+      // Scroll to reviews section smoothly after a short delay
+      setTimeout(() => {
+        document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 500);
+    }
+  }, [searchParams, location]);
 
   useEffect(() => {
     setLoading(true);
@@ -83,7 +100,30 @@ export default function ProductDetail() {
       })
       .catch(() => navigate("/products"))
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, isAuthenticated]);
+
+  // Fetch eligible items to check if user can review this product
+  useEffect(() => {
+    if (!isAuthenticated || !product) return;
+    
+    // Check if the URL requested a specific order item to review
+    const targetOrderItemId = searchParams.get("review");
+    
+    reviewsService.eligible()
+      .then(res => {
+        const items = res.data.data || [];
+        // If a specific order item was requested, try to find it
+        if (targetOrderItemId) {
+          const item = items.find(i => i.id == targetOrderItemId && i.product.id === product.id);
+          if (item) setEligibleItem(item);
+        } else {
+          // Otherwise just see if they have *any* eligible order item for this product
+          const item = items.find(i => i.product.id === product.id);
+          if (item) setEligibleItem(item);
+        }
+      })
+      .catch(console.error);
+  }, [isAuthenticated, product, searchParams]);
 
   if (loading)
     return (
@@ -560,14 +600,23 @@ export default function ProductDetail() {
               {product.specifications && Object.keys(product.specifications).length > 0 ? (
                 <table className="w-full text-sm">
                   <tbody>
-                    {Object.entries(product.specifications).map(([key, val], i) => val ? (
-                      <tr key={i} className={i % 2 === 0 ? "bg-surface" : ""}>
-                        <td className="py-2 px-4 font-semibold text-secondary w-40 capitalize">
-                          {key}
-                        </td>
-                        <td className="py-2 px-4 text-dark">{val}</td>
-                      </tr>
-                    ) : null)}
+                    {Array.isArray(product.specifications)
+                      ? product.specifications.map((spec, i) => (
+                          <tr key={i} className={i % 2 === 0 ? "bg-surface" : ""}>
+                            <td className="py-2 px-4 font-semibold text-secondary w-40 capitalize">
+                              {spec.label}
+                            </td>
+                            <td className="py-2 px-4 text-dark">{spec.value}</td>
+                          </tr>
+                        ))
+                      : Object.entries(product.specifications).map(([key, val], i) => val ? (
+                          <tr key={i} className={i % 2 === 0 ? "bg-surface" : ""}>
+                            <td className="py-2 px-4 font-semibold text-secondary w-40 capitalize">
+                              {key}
+                            </td>
+                            <td className="py-2 px-4 text-dark">{val}</td>
+                          </tr>
+                        ) : null)}
                   </tbody>
                 </table>
               ) : (
@@ -579,7 +628,42 @@ export default function ProductDetail() {
           )}
 
           {activeTab === "reviews" && (
-            <div className="space-y-4 max-w-2xl">
+            <div id="reviews-section" className="space-y-4 max-w-2xl">
+              {/* Review Form for Eligible Buyers */}
+              {isAuthenticated && eligibleItem && (
+                <div className="border border-border rounded-xl p-5 mb-8 bg-blue-50/50 dark:bg-blue-900/10">
+                  <h4 className="font-bold text-dark mb-4">
+                    {isAr ? "اكتب تقييمك" : isFr ? "Écrivez votre avis" : "Write Your Review"}
+                  </h4>
+                  <ReviewForm 
+                    orderItemId={eligibleItem.id} 
+                    onSuccess={() => {
+                      setEligibleItem(null);
+                      setHasSubmittedReview(true);
+                    }} 
+                  />
+                </div>
+              )}
+              {hasSubmittedReview && (
+                <div className="bg-green-50 text-green-700 p-4 rounded-xl text-sm mb-6 border border-green-200">
+                  {isAr 
+                    ? "شكراً لك! تقييمك قيد المراجعة وسوف يظهر قريباً."
+                    : isFr 
+                      ? "Merci ! Votre avis est en attente de modération."
+                      : "Thank you! Your review is pending moderation and will appear shortly."}
+                </div>
+              )}
+              {isAuthenticated && !eligibleItem && !hasSubmittedReview && (
+                <p className="text-sm text-muted mb-6 italic">
+                  {isAr 
+                    ? "يمكن فقط للمشترين الذين استلموا هذا المنتج ترك تقييم."
+                    : isFr 
+                      ? "Seuls les acheteurs ayant reçu ce produit peuvent laisser un avis."
+                      : "Only verified buyers who received this product can leave a review."}
+                </p>
+              )}
+
+              {/* Existing Reviews List */}
               {product.reviews?.length > 0 ? (
                 product.reviews.map((r) => (
                   <div key={r.id} className="card p-4">

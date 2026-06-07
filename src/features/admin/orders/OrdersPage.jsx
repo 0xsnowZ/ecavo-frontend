@@ -160,36 +160,7 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-5">
-      {loading ? (
-        <>
-          {/* Title skeleton */}
-          <SkeletonLoader height={28} width={150} />
-
-          {/* Filters skeleton */}
-          <div className="card p-4 flex flex-col sm:flex-row gap-3">
-            <SkeletonLoader height={42} className="flex-1" />
-            <SkeletonLoader height={42} width={150} />
-            <SkeletonLoader height={42} width={42} />
-          </div>
-
-          {/* Table skeleton */}
-          <div className="card overflow-hidden">
-            <div className="p-6 space-y-4">
-              <SkeletonLoader height={20} count={7} />
-              <div className="border-t border-border dark:border-gray-700 my-4" />
-              <SkeletonLoader height={20} count={7} />
-              <div className="border-t border-border dark:border-gray-700 my-4" />
-              <SkeletonLoader height={20} count={7} />
-              <div className="border-t border-border dark:border-gray-700 my-4" />
-              <SkeletonLoader height={20} count={7} />
-              <div className="border-t border-border dark:border-gray-700 my-4" />
-              <SkeletonLoader height={20} count={7} />
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          <h1 className="text-xl font-black text-secondary dark:text-white">
+      <h1 className="text-xl font-black text-secondary dark:text-white">
             {isAr
               ? "إدارة الطلبات"
               : isFr
@@ -284,8 +255,18 @@ export default function OrdersPage() {
                 <tbody className="divide-y divide-border dark:divide-gray-700">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center">
-                        <Spinner />
+                      <td colSpan={7} className="p-6">
+                        <div className="space-y-4">
+                          <SkeletonLoader height={20} count={7} />
+                          <div className="border-t border-border dark:border-gray-700 my-4" />
+                          <SkeletonLoader height={20} count={7} />
+                          <div className="border-t border-border dark:border-gray-700 my-4" />
+                          <SkeletonLoader height={20} count={7} />
+                          <div className="border-t border-border dark:border-gray-700 my-4" />
+                          <SkeletonLoader height={20} count={7} />
+                          <div className="border-t border-border dark:border-gray-700 my-4" />
+                          <SkeletonLoader height={20} count={7} />
+                        </div>
                       </td>
                     </tr>
                   ) : orders.length === 0 ? (
@@ -468,8 +449,6 @@ export default function OrdersPage() {
             </div>,
             document.body
           )}
-        </>
-      )}
     </div>
   );
 }

@@ -15,9 +15,9 @@
 
 ## 📖 Overview
 
-**ECAVO** is a full-featured, bilingual (Arabic/English) e-commerce frontend built with React 19, Vite, and TailwindCSS. It connects to a Laravel 11 REST API and offers a complete shopping experience — from product browsing and cart management to checkout, order tracking, and a full admin dashboard.
+**ECAVO** is a full-featured, trilingual (Arabic / English / French) e-commerce frontend built with React 19, Vite, and TailwindCSS. It connects to a Laravel 13 REST API and offers a complete shopping experience — from product browsing and cart management to checkout, order tracking, and a full admin dashboard.
 
-> RTL-first design. All layouts, typography, and animations are optimised for Arabic. English is fully supported with automatic LTR switching.
+> RTL-first design. All layouts, typography, and animations are optimised for Arabic. English and French are fully supported with automatic LTR switching.
 
 ---
 
@@ -44,19 +44,26 @@
 | Section | Features |
 |---|---|
 | **Dashboard** | Live KPI cards, 11-status order distribution, recent orders table |
-| **Orders** | Searchable table, status update modal (11 statuses), colored badges |
-| **Products** | Full CRUD, drag-and-drop image upload (up to 8 images), set primary image |
-| **Categories** | Hierarchical tree, bilingual create/edit modal, delete protection |
+| **Orders** | Searchable & filterable table, persistent search bar (no jump on load), skeleton table loading, status update modal, 11 colored status badges |
+| **Products** | Full CRUD, drag-and-drop image upload (up to 8 images), set primary image, manage variants, persistent search bar with skeleton table loading |
+| **Categories** | Hierarchical tree, bilingual create/edit modal, delete protection, **auto-incremented `sort_order`** on new category |
+| **Reviews** | Moderation table with approve/delete, persistent search + filter, skeleton table loading |
+| **Banners** | Hero banner management, active/inactive toggle, **custom styled delete confirmation modal** |
+| **Coupons** | Percent & fixed discount codes, usage limits, expiry dates |
 
 ### 🌐 Internationalisation & Currency
-- **Languages**: Arabic (RTL) + English (LTR) — switched from the top bar
+- **Languages**: Arabic (RTL) + English (LTR) + French — switched from the top bar
 - **Currencies**: USD, MAD, EGP, SAR, AED, EUR, GBP — live rates from `open.er-api.com` (60-min cache)
 - Auto `dir` / `lang` attribute sync on `<html>`
 
 ### ⚡ Performance & UX
-- Shimmer skeleton loaders (product cards, rows, detail page)
-- Image lazy loading
-- Swiper carousels with custom styled navigation arrows
+- **Homepage skeleton screen** (`HomePageSkeleton`) — replaces bare spinner on initial load; sidebar, hero slot, feature bar, and product-card grids all pulse as content-shaped placeholders
+- **Scoped skeleton loading** in all admin tables — the search bar and page header stay permanently visible and interactive while data loads; only the table rows pulse
+- Shimmer skeleton loaders on product cards, rows, and detail page
+- **React Portals** for all admin modals — prevents z-index clipping inside scrollable containers
+- **Styled delete confirmation modals** across admin pages (banners, reviews, products) replacing native `window.confirm`
+- Image lazy loading with eager loading on the first hero slide
+- Swiper carousels with custom styled navigation arrows (RTL-aware)
 - Smooth drawer slide animations (RTL-aware)
 - `react-helmet-async` SEO (title, description, Open Graph, Twitter cards)
 - Live exchange rates fetched once per session
@@ -75,9 +82,9 @@ ecavo-frontend/
     │   ├── common/             # HeroSlider, BannerGrid, FeatureBar, SEO, SectionTitle
     │   ├── layout/             # Header (TopBar, SearchBar, NavMenu, CartIcon, SidebarDrawer), Footer
     │   ├── product/            # ProductCard
-    │   └── ui/                 # Spinner, Skeleton, StarRating, CountdownTimer
+    │   └── ui/                 # Spinner, Skeleton, StarRating, CountdownTimer, HomePageSkeleton
     ├── features/
-    │   ├── admin/              # DashboardPage, OrdersPage, ProductsPage, CategoriesPage
+    │   ├── admin/              # DashboardPage, OrdersPage, ProductsPage, CategoriesPage, ReviewsPage, BannersPage, CouponsPage
     │   ├── auth/               # LoginForm, RegisterForm
     │   ├── cart/               # CartDrawer
     │   ├── checkout/           # CheckoutForm

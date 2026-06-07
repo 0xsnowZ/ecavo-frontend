@@ -18,18 +18,9 @@ import { getRvIds } from '../utils/recentlyViewed';
 import { resolveImages } from '../utils/imageUrl';
 import { getLocalized } from '../utils/localize';
 
-// Banners stay static (unchanged)
-import banner1 from '../assets/img/banner-1.jpg';
-import banner2 from '../assets/img/banner-2.jpg';
-import banner3 from '../assets/img/banner-3.jpg';
-import banner4 from '../assets/img/banner-4.jpg';
-import banner5 from '../assets/img/banner-5.jpg';
 import bannerSm1 from '../assets/img/banner-sm-1.jpg';
 import bannerSm2 from '../assets/img/banner-sm-2.jpg';
 import bannerSm3 from '../assets/img/banner-sm-3.jpg';
-import banner6 from '../assets/img/banner-6.jpg';
-import banner7 from '../assets/img/banner-7.jpg';
-import banner8 from '../assets/img/banner-8.jpg';
 
 // Sidebar — matches the 10 seeded categories
 const SIDEBAR_CATEGORIES = [
@@ -212,18 +203,6 @@ export default function Home() {
       {/* Feature Bar */}
       <FeatureBar />
 
-      {/* Banner row 1 — unchanged */}
-      <section className="container-main py-4">
-        <BannerGrid
-          cols={3}
-          banners={[
-            { src: banner1, to: '/products' },
-            { src: banner2, to: '/products' },
-            { src: banner3, to: '/products' },
-          ]}
-        />
-      </section>
-
       {/* Featured Deals (with countdown timer) */}
       <section className="container-main py-6">
         <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
@@ -238,17 +217,6 @@ export default function Home() {
           slidesPerView={{ base: 2, sm: 2, lg: 3, xl: 4 }}
           showCountdown
           
-        />
-      </section>
-
-      {/* Banner row 2 — unchanged */}
-      <section className="container-main py-4">
-        <BannerGrid
-          cols={2}
-          banners={[
-            { src: banner4, to: '/products' },
-            { src: banner5, to: '/products' },
-          ]}
         />
       </section>
 
@@ -331,18 +299,6 @@ export default function Home() {
             />
           </div>
         </div>
-      </section>
-
-      {/* Banner row 3 */}
-      <section className="container-main py-4">
-        <BannerGrid
-          cols={3}
-          banners={[
-            { src: banner6, to: '/products' },
-            { src: banner7, to: '/products' },
-            { src: banner8, to: '/products' },
-          ]}
-        />
       </section>
 
       {/* Viewed Products — only render when there is actual history */}

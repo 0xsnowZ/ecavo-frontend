@@ -228,98 +228,75 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-5">
-      {loading ? (
-        <>
-          {/* Header skeleton */}
-          <div className="flex items-center justify-between">
-            <SkeletonLoader height={28} width={150} />
-            <SkeletonLoader height={36} width={100} />
-          </div>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-black text-secondary dark:text-white">
+          {isAr ? "إدارة المنتجات" : "Products Management"}
+        </h1>
+        <button onClick={openCreate} className="btn-primary text-sm">
+          <Plus size={16} /> {isAr ? "إضافة منتج" : "Add Product"}
+        </button>
+      </div>
 
-          {/* Search bar skeleton */}
-          <div className="card p-4 flex gap-3">
-            <SkeletonLoader height={42} className="flex-1" />
-            <SkeletonLoader height={42} width={42} />
-          </div>
+      {/* Search bar */}
+      <div className="card p-4 flex gap-3">
+        <div className="relative flex-1">
+          <Search
+            size={16}
+            className="absolute start-3 top-1/2 -translate-y-1/2 text-muted"
+          />
+          <input
+            type="text"
+            placeholder={isAr ? "ابحث عن منتج..." : "Search products..."}
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="input-field ps-9"
+          />
+        </div>
+        <button onClick={fetchProducts} className="btn-ghost px-3">
+          <RefreshCw size={16} />
+        </button>
+      </div>
 
-          {/* Table skeleton */}
-          <div className="card overflow-hidden">
-            <div className="p-6 space-y-4">
-              <SkeletonLoader height={20} count={5} />
-              <div className="border-t border-border dark:border-gray-700 my-4" />
-              <SkeletonLoader height={20} count={5} />
-              <div className="border-t border-border dark:border-gray-700 my-4" />
-              <SkeletonLoader height={20} count={5} />
-              <div className="border-t border-border dark:border-gray-700 my-4" />
-              <SkeletonLoader height={20} count={5} />
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-black text-secondary dark:text-white">
-              {isAr ? "إدارة المنتجات" : "Products Management"}
-            </h1>
-            <button onClick={openCreate} className="btn-primary text-sm">
-              <Plus size={16} /> {isAr ? "إضافة منتج" : "Add Product"}
-            </button>
-          </div>
-
-          {/* Search bar */}
-          <div className="card p-4 flex gap-3">
-            <div className="relative flex-1">
-              <Search
-                size={16}
-                className="absolute start-3 top-1/2 -translate-y-1/2 text-muted"
-              />
-              <input
-                type="text"
-                placeholder={isAr ? "ابحث عن منتج..." : "Search products..."}
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="input-field ps-9"
-              />
-            </div>
-            <button onClick={fetchProducts} className="btn-ghost px-3">
-              <RefreshCw size={16} />
-            </button>
-          </div>
-
-          {/* Table */}
-          <div className="card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm admin-table">
-                <thead className="bg-surface dark:bg-gray-900/50">
-                  <tr>
-                    {[
-                      isAr ? "المنتج" : "Product",
-                      isAr ? "السعر" : "Price",
-                      isAr ? "المخزون" : "Stock",
-                      isAr ? "القسم" : "Category",
-                      isAr ? "الحالة" : "Status",
-                      isAr ? "إجراء" : "Actions",
-                    ].map((h) => (
-                      <th
-                        key={h}
-                        className="text-start px-4 py-3 text-xs font-semibold text-muted dark:text-gray-400 uppercase tracking-wider"
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border dark:divide-gray-700">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={6} className="py-12 text-center">
-                        <Spinner />
-                      </td>
-                    </tr>
+      {/* Table */}
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm admin-table">
+            <thead className="bg-surface dark:bg-gray-900/50">
+              <tr>
+                {[
+                  isAr ? "المنتج" : "Product",
+                  isAr ? "السعر" : "Price",
+                  isAr ? "المخزون" : "Stock",
+                  isAr ? "القسم" : "Category",
+                  isAr ? "الحالة" : "Status",
+                  isAr ? "إجراء" : "Actions",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="text-start px-4 py-3 text-xs font-semibold text-muted dark:text-gray-400 uppercase tracking-wider"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border dark:divide-gray-700">
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="p-6">
+                    <div className="space-y-4">
+                      <SkeletonLoader height={20} count={5} />
+                      <div className="border-t border-border dark:border-gray-700 my-4" />
+                      <SkeletonLoader height={20} count={5} />
+                      <div className="border-t border-border dark:border-gray-700 my-4" />
+                      <SkeletonLoader height={20} count={5} />
+                    </div>
+                  </td>
+                </tr>
                   ) : products.length === 0 ? (
                     <tr>
                       <td
@@ -862,8 +839,6 @@ export default function ProductsPage() {
             </div>,
             document.body
           )}
-        </>
-      )}
     </div>
   );
 }

@@ -14,8 +14,9 @@ import {
   Truck,
   ShieldCheck,
   XCircle,
+  Star,
 } from "lucide-react";
-import { authService, ordersService } from "../services";
+import { authService, ordersService, reviewsService } from "../services";
 import { resolveImageUrl } from "../utils/imageUrl";
 import { useAuthStore } from "../store/useAuthStore";
 import { useLocaleStore } from "../store/useLocaleStore";
@@ -45,6 +46,7 @@ export default function Account() {
   const [tab, setTab] = useState("orders"); // orders | profile
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
+  const [eligibleReviewItems, setEligibleReviewItems] = useState(new Set());
   const [editMode, setEditMode] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: user?.name || "",
@@ -55,9 +57,15 @@ export default function Account() {
   const [saveOk, setSaveOk] = useState(false);
 
   useEffect(() => {
-    ordersService
-      .list()
-      .then((r) => setOrders(r.data.data || []))
+    Promise.all([
+      ordersService.list(),
+      reviewsService.eligible().catch(() => ({ data: { data: [] } }))
+    ])
+      .then(([ordersRes, reviewsRes]) => {
+        setOrders(ordersRes.data.data || []);
+        const eligibleIds = new Set((reviewsRes.data.data || []).map(item => item.id));
+        setEligibleReviewItems(eligibleIds);
+      })
       .catch(() => {})
       .finally(() => setOrdersLoading(false));
   }, []);
@@ -270,29 +278,41 @@ export default function Account() {
                         </div>
                       </div>
 
-                      {/* Items preview */}
+                      {/* Items preview with potential review button */}
                       {order.items?.length > 0 && (
-                        <div className="flex gap-2 mt-3 overflow-hidden">
-                          {order.items
-                            .slice(0, 4)
-                            .map(
-                              (item) =>
-                                item.product?.images?.[0] && (
-                                  <img
-                                    key={item.id}
-                                    src={resolveImageUrl(
-                                      item.product.images[0],
-                                    )}
-                                    alt=""
-                                    className="w-10 h-10 object-contain rounded-lg bg-gray-50 p-0.5"
-                                  />
-                                ),
-                            )}
-                          {order.items.length > 4 && (
-                            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-muted font-bold">
-                              +{order.items.length - 4}
+                        <div className="mt-4 flex flex-col gap-3 border-t border-border/50 pt-3">
+                          {order.items.map((item) => (
+                            <div key={item.id} className="flex items-center gap-3">
+                              {item.product?.images?.[0] ? (
+                                <img
+                                  src={resolveImageUrl(item.product.images[0])}
+                                  alt={item.product_name}
+                                  className="w-12 h-12 object-contain rounded-lg bg-gray-50 p-1 border border-border"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-lg bg-gray-100 border border-border flex items-center justify-center">
+                                  <Package size={20} className="text-gray-400" />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-dark truncate">
+                                  {item.product_name}
+                                </p>
+                                <p className="text-xs text-muted">
+                                  {item.qty} × {fmt(item.unit_price)}
+                                </p>
+                              </div>
+                              {eligibleReviewItems.has(item.id) && (
+                                <Link
+                                  to={`/products/${item.product.slug}?review=${item.id}#reviews`}
+                                  className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-yellow-600 bg-yellow-50 hover:bg-yellow-100 rounded-md transition-colors"
+                                >
+                                  <Star size={12} className="fill-yellow-600" />
+                                  {t("account_page.leave_review", { defaultValue: "Leave a Review" })}
+                                </Link>
+                              )}
                             </div>
-                          )}
+                          ))}
                         </div>
                       )}
                     </div>

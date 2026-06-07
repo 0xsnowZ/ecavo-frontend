@@ -4,6 +4,7 @@ import { lazy, Suspense } from 'react';
 import MainLayout from '../layouts/MainLayout';
 import AdminLayout from '../layouts/AdminLayout';
 import Spinner from '../components/ui/Spinner';
+import HomePageSkeleton from '../components/ui/HomePageSkeleton';
 import ProtectedRoute from '../components/common/ProtectedRoute';
 
 const Fallback = () => (
@@ -12,6 +13,13 @@ const Fallback = () => (
 
 const withSuspense = (Comp) => (
   <Suspense fallback={<Fallback />}>
+    <Comp />
+  </Suspense>
+);
+
+// Home gets a content-shaped skeleton so the page never shows a bare spinner
+const withHomeSuspense = (Comp) => (
+  <Suspense fallback={<HomePageSkeleton />}>
     <Comp />
   </Suspense>
 );
@@ -49,7 +57,7 @@ const router = createBrowserRouter([
     path: '/',
     element: <MainLayout />,
     children: [
-      { index: true,                element: withSuspense(HomePage) },
+      { index: true,                element: withHomeSuspense(HomePage) },
       { path: 'products',           element: withSuspense(ProductsPage) },
       { path: 'products/:slug',     element: withSuspense(ProductDetail) },
       { path: 'categories',         element: withSuspense(CategoriesPage) },

@@ -16,6 +16,7 @@ export default function BannersPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [deletingBanner, setDeletingBanner] = useState(null);
 
   // Form state
   const [file, setFile] = useState(null);
@@ -146,14 +147,20 @@ export default function BannersPage() {
     }
   };
 
-  const deleteBanner = async (id) => {
-    if (!window.confirm(t("admin.confirm_delete", "Are you sure you want to delete this?"))) return;
+  const deleteBanner = (id) => {
+    setDeletingBanner(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingBanner) return;
     try {
-      await adminBannersService.delete(id);
+      await adminBannersService.delete(deletingBanner);
       toast.success(t("admin.success.deleted", "Deleted successfully"));
       fetchBanners();
     } catch (error) {
       toast.error(t("admin.errors.delete_failed", "Failed to delete"));
+    } finally {
+      setDeletingBanner(null);
     }
   };
 
@@ -360,6 +367,42 @@ export default function BannersPage() {
             </form>
           </div>
         </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingBanner && createPortal(
+        <div className={dark ? "dark" : ""}>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl shadow-xl p-6 text-center animate-slide-up">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                {t("admin.confirm_delete", "Are you sure?")}
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
+                {t("admin.delete_warning", "You are about to delete this banner. This action cannot be undone.")}
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={() => setDeletingBanner(null)}
+                  className="px-5 py-2 text-gray-700 dark:text-gray-300 font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                >
+                  {t("admin.cancel", "Cancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  className="px-5 py-2 text-white font-medium bg-red-500 hover:bg-red-600 rounded-xl transition-colors"
+                >
+                  {t("admin.delete", "Delete")}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>,
         document.body
       )}

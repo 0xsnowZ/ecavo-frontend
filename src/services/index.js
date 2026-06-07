@@ -58,6 +58,11 @@ export const recentlyViewedService = {
   track: (productId) => api.post(`/recently-viewed/${productId}`),
 };
 
+export const reviewsService = {
+  eligible: () => api.get('/reviews/eligible'),
+  submit: (data) => api.post('/reviews', data),
+};
+
 export const adminService = {
   stats: () => api.get('/admin/dashboard/stats'),
 

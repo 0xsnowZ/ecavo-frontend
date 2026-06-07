@@ -88,20 +88,6 @@ export default function ReviewsPage() {
 
   return (
     <div className="space-y-5">
-      {loading ? (
-        <>
-          <SkeletonLoader height={28} width={200} />
-          <div className="card p-4 flex flex-col sm:flex-row gap-3">
-            <SkeletonLoader height={42} className="flex-1" />
-            <SkeletonLoader height={42} width={160} />
-            <SkeletonLoader height={42} width={42} />
-          </div>
-          <div className="card p-6 space-y-4">
-            {[...Array(5)].map((_, i) => <SkeletonLoader key={i} height={64} />)}
-          </div>
-        </>
-      ) : (
-        <>
           <h1 className="text-xl font-black text-secondary dark:text-white">
             {isAr ? 'إدارة التقييمات' : isFr ? 'Modération des Avis' : 'Reviews Moderation'}
           </h1>
@@ -156,7 +142,15 @@ export default function ReviewsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border dark:divide-gray-700">
-                  {reviews.length === 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="p-6">
+                        <div className="space-y-4">
+                          {[...Array(5)].map((_, i) => <SkeletonLoader key={i} height={64} />)}
+                        </div>
+                      </td>
+                    </tr>
+                  ) : reviews.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-12 text-center text-muted dark:text-gray-400 text-sm">
                         {isAr ? 'لا توجد تقييمات' : isFr ? 'Aucun avis' : 'No reviews found'}
@@ -251,8 +245,6 @@ export default function ReviewsPage() {
               </div>
             )}
           </div>
-        </>
-      )}
 
       {/* Delete confirmation (Styled like ProductsPage) */}
       {deleteId && createPortal(

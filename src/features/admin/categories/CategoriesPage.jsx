@@ -49,7 +49,18 @@ export default function CategoriesPage() {
   }, [fetchCategories]);
 
   const openCreate = () => {
-    setForm(EMPTY_FORM);
+    let maxSortOrder = -1;
+    categories.forEach(cat => {
+      if (cat.sort_order > maxSortOrder) maxSortOrder = cat.sort_order;
+      (cat.children || []).forEach(child => {
+        if (child.sort_order > maxSortOrder) maxSortOrder = child.sort_order;
+      });
+    });
+    
+    setForm({
+      ...EMPTY_FORM,
+      sort_order: maxSortOrder + 1,
+    });
     setErrors({});
     setEditCat(null);
     setModal("create");
