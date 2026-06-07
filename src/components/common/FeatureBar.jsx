@@ -21,11 +21,11 @@ export default function FeatureBar() {
   return (
     <div className="bg-white border-y border-border py-4 my-4">
       <div className="container-main">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory lg:grid lg:grid-cols-5 gap-4 pb-2 lg:pb-0">
           {FEATURES.map(({ img, titleKey, descKey }) => (
             <div
               key={titleKey}
-              className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-colors group"
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface transition-colors group shrink-0 w-[240px] sm:w-[280px] lg:w-auto snap-start"
             >
               <img
                 src={img}

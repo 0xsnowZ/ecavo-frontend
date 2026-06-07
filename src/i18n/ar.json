@@ -1,16 +1,11 @@
 {
   "nav": {
     "home": "الرئيسة",
-    "appliances": "الأجهزة الكهربائية",
-    "houseware": "الأدوات المنزلية",
-    "mobiles": "الموبايلات واكسسواراتها",
-    "clothes": "الملابس",
-    "beauty": "مستحضرات الجمال",
-    "furniture": "المفروشات",
-    "washing_machines": "غسالات",
-    "refrigerators": "ثلاجات",
-    "vacuums": "مكانس",
-    "ac": "شبابيك"
+    "all_products": "كل المنتجات",
+    "todays_deals": "عروض اليوم",
+    "best_sellers": "الأكثر مبيعاً",
+    "track_order": "تتبع الطلب",
+    "contact_us": "اتصل بنا"
   },
   "header": {
     "welcome": "مرحبا بكم في متجر إيكافو",

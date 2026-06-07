@@ -5,21 +5,10 @@ import { ChevronDown } from 'lucide-react';
 
 const NAV_ITEMS = [
   { key: 'nav.home', to: '/' },
-  {
-    key: 'nav.appliances',
-    to: '/categories/appliances',
-    children: [
-      { key: 'nav.washing_machines', to: '/products?cat=washing-machines' },
-      { key: 'nav.refrigerators', to: '/products?cat=refrigerators' },
-      { key: 'nav.vacuums', to: '/products?cat=vacuums' },
-      { key: 'nav.ac', to: '/products?cat=ac' },
-    ],
-  },
-  { key: 'nav.houseware', to: '/categories/houseware' },
-  { key: 'nav.mobiles', to: '/categories/mobiles' },
-  { key: 'nav.clothes', to: '/categories/clothes' },
-  { key: 'nav.beauty', to: '/categories/beauty' },
-  { key: 'nav.furniture', to: '/categories/furniture' },
+  { key: 'nav.all_products', to: '/products' },
+  { key: 'nav.todays_deals', to: '/products?sort=discount' },
+  { key: 'nav.best_sellers', to: '/products?sort=popular' },
+  { key: 'nav.track_order', to: '/account?tab=orders' },
 ];
 
 export default function NavMenu() {

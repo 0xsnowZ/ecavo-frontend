@@ -1,16 +1,11 @@
 {
   "nav": {
     "home": "Accueil",
-    "appliances": "Électroménager",
-    "houseware": "Articles ménagers",
-    "mobiles": "Mobiles & Accessoires",
-    "clothes": "Vêtements",
-    "beauty": "Beauté",
-    "furniture": "Meubles",
-    "washing_machines": "Lave-linge",
-    "refrigerators": "Réfrigérateurs",
-    "vacuums": "Aspirateurs",
-    "ac": "Climatiseurs"
+    "all_products": "Tous les produits",
+    "todays_deals": "Offres du jour",
+    "best_sellers": "Meilleures ventes",
+    "track_order": "Suivre ma commande",
+    "contact_us": "Nous contacter"
   },
   "header": {
     "welcome": "Bienvenue sur ECAVO",

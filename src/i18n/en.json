@@ -1,16 +1,11 @@
 {
   "nav": {
     "home": "Home",
-    "appliances": "Appliances",
-    "houseware": "Houseware",
-    "mobiles": "Mobiles & Accessories",
-    "clothes": "Clothes",
-    "beauty": "Beauty",
-    "furniture": "Furniture",
-    "washing_machines": "Washing Machines",
-    "refrigerators": "Refrigerators",
-    "vacuums": "Vacuums",
-    "ac": "Air Conditioners"
+    "all_products": "All Products",
+    "todays_deals": "Today's Deals",
+    "best_sellers": "Best Sellers",
+    "track_order": "Track Order",
+    "contact_us": "Contact Us"
   },
   "header": {
     "welcome": "Welcome to ECAVO Store",
