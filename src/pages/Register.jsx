@@ -5,6 +5,7 @@ import { Mail, Lock, Eye, EyeOff, User, Phone, Loader2 } from 'lucide-react';
 import { authService } from '../services';
 import { GOOGLE_AUTH_URL } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
+import BrandLogo from '../components/common/BrandLogo';
 import googleIcon from '../assets/img/google.png';
 
 export default function Register() {
@@ -75,9 +76,9 @@ export default function Register() {
         <div className="card p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <Link to="/" className="text-3xl font-black text-secondary">
-              E<span className="text-primary">CAVO</span>
-            </Link>
+            <div className="flex justify-center mb-3">
+              <BrandLogo size="lg" />
+            </div>
             <h1 className="text-xl font-bold text-dark mt-2">{t('auth.register')}</h1>
             <p className="text-sm text-muted mt-1">
               {isAr ? 'أنشئ حسابك وابدأ التسوق.' : 'Create your account and start shopping.'}

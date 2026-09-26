@@ -15,7 +15,7 @@ export default function SEO({
   titleEn,
   descriptionAr = DEFAULT_DESC,
   descriptionEn = 'Shop the best products at unbeatable prices.',
-  image = '/og-image.jpg',
+  image = '/og-image.png',
   noIndex = false,
   lang = 'ar',
 }) {

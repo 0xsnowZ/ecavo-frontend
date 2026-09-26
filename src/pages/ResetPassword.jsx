@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { authService } from '../services';
+import { toast } from 'sonner';
+import BrandLogo from '../components/common/BrandLogo';
 
 export default function ResetPassword() {
   const { i18n } = useTranslation();
@@ -77,9 +78,9 @@ export default function ResetPassword() {
       <div className="w-full max-w-md">
         <div className="card p-8">
           <div className="text-center mb-8">
-            <Link to="/" className="text-3xl font-black text-secondary">
-              E<span className="text-primary">CAVO</span>
-            </Link>
+            <div className="flex justify-center mb-3">
+              <BrandLogo size="lg" />
+            </div>
             <h1 className="text-xl font-bold text-dark mt-2">
               {isAr ? 'تعيين كلمة مرور جديدة' : 'Create New Password'}
             </h1>

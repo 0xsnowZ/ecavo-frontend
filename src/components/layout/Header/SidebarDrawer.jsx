@@ -1,5 +1,6 @@
 import { X, User, Heart, Globe, DollarSign } from 'lucide-react';
 import { NavLink, Link } from 'react-router-dom';
+import BrandLogo from '../../common/BrandLogo';
 import { useTranslation } from 'react-i18next';
 import { useLocaleStore, CURRENCIES, LANGUAGES } from '../../../store/useLocaleStore';
 import { useAuthStore } from '../../../store/useAuthStore';
@@ -51,12 +52,12 @@ export default function SidebarDrawer({ open, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div>
-            <p className="text-xs text-muted font-medium uppercase tracking-wider">
+            <p className="text-xs text-muted font-medium uppercase tracking-wider mb-1">
               {t('sidebar.shop_by')}
             </p>
-            <Link to="/" onClick={onClose} className="text-xl font-black text-secondary">
-              E<span className="text-primary">CAVO</span>
-            </Link>
+            <div onClick={onClose}>
+              <BrandLogo size="sm" />
+            </div>
           </div>
           <button
             type="button"

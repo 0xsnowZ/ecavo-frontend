@@ -7,6 +7,7 @@ import SearchBar from './SearchBar';
 import CartIcon from './CartIcon';
 import NavMenu from './NavMenu';
 import SidebarDrawer from './SidebarDrawer';
+import BrandLogo from '../../common/BrandLogo';
 import { useAuthStore } from '../../../store/useAuthStore';
 
 export default function Header({ onCartOpen }) {
@@ -31,9 +32,7 @@ export default function Header({ onCartOpen }) {
             >
               <Menu size={22} />
             </button>
-            <Link to="/" className="text-2xl lg:text-3xl font-black text-secondary shrink-0">
-              E<span className="text-primary">CAVO</span>
-            </Link>
+            <BrandLogo size="md" className="shrink-0" />
           </div>
 
           {/* SearchBar (Desktop) */}

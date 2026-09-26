@@ -21,6 +21,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import useThemeStore from "../store/useThemeStore";
 import { useLocaleStore } from "../store/useLocaleStore";
 import { adminNotificationsService } from "../services";
+import BrandLogo from "../components/common/BrandLogo";
 
 const adminLinks = [
   {
@@ -72,6 +73,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const isAr = language === "ar";
+  const isFr = language === "fr";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -139,15 +141,12 @@ export default function AdminLayout() {
       >
         {/* Logo */}
         <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-800">
-          <a
-            href="/admin"
-            className="text-2xl font-black text-gray-900 dark:text-white"
-          >
-            E<span className="text-primary">CAVO</span>
-          </a>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {isAr ? "لوحة التحكم" : "Admin Panel"}
-          </p>
+          <BrandLogo
+            size="md"
+            variant="dark"
+            subtitle={isAr ? "لوحة التحكم" : isFr ? "Panneau Admin" : "Admin Panel"}
+            linkTo="/admin"
+          />
         </div>
 
         {/* Nav */}
