@@ -190,7 +190,7 @@ const STATUS_CONFIG = {
 };
 
 export default function DashboardPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { language } = useLocaleStore();
   const isAr = language === "ar";
   const isFr = language === "fr";

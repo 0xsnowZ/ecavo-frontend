@@ -1,8 +1,6 @@
 import { AlertCircle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 export default function ErrorFallback({ error, resetErrorBoundary }) {
-  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center p-6">

@@ -10,8 +10,6 @@ export default function MobileNav({ onCartOpen }) {
   const count = useCartStore((s) => s.getCount());
   const { isAuthenticated } = useAuthStore();
 
-  const isActive = (path) => location.pathname === path;
-
   const navItems = [
     {
       icon: Home,

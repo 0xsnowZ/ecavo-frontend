@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { authService } from '../services';
 
 export default function ResetPassword() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();

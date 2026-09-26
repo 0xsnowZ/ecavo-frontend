@@ -35,7 +35,7 @@ export default function BannersPage() {
       setLoading(true);
       const { data } = await adminBannersService.getAll();
       setBanners(data);
-    } catch (error) {
+    } catch (_error) {
       toast.error(t("admin.errors.fetch_failed", "Failed to fetch banners"));
     } finally {
       setLoading(false);
@@ -44,6 +44,7 @@ export default function BannersPage() {
 
   useEffect(() => {
     fetchBanners();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openModal = async (banner = null) => {
@@ -58,7 +59,7 @@ export default function BannersPage() {
         const response = await api.get(`/admin/banners/image?path=${encodeURIComponent(pathPart)}`, { responseType: 'blob' });
         const blobUrl = URL.createObjectURL(response.data);
         setPreview(blobUrl);
-      } catch (err) {
+      } catch (_err) {
         toast.error("Failed to load image for cropping");
         setPreview(banner.image_url);
       }
@@ -105,7 +106,7 @@ export default function BannersPage() {
       try {
         const croppedImageBlob = await getCroppedImg(preview, croppedAreaPixels);
         formData.append("image", croppedImageBlob, "banner.jpg");
-      } catch (err) {
+      } catch (_err) {
         toast.error("Failed to crop image. CORS issue or network error.");
         return;
       }
@@ -132,7 +133,7 @@ export default function BannersPage() {
       }
       setIsModalOpen(false);
       fetchBanners();
-    } catch (error) {
+    } catch (_error) {
       toast.error(t("admin.errors.save_failed", "Failed to save"));
     }
   };
@@ -142,7 +143,7 @@ export default function BannersPage() {
       await adminBannersService.toggleActive(id);
       toast.success(t("admin.success.updated", "Status updated"));
       fetchBanners();
-    } catch (error) {
+    } catch (_error) {
       toast.error(t("admin.errors.update_failed", "Failed to update"));
     }
   };
@@ -157,7 +158,7 @@ export default function BannersPage() {
       await adminBannersService.delete(deletingBanner);
       toast.success(t("admin.success.deleted", "Deleted successfully"));
       fetchBanners();
-    } catch (error) {
+    } catch (_error) {
       toast.error(t("admin.errors.delete_failed", "Failed to delete"));
     } finally {
       setDeletingBanner(null);

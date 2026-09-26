@@ -2,7 +2,6 @@ import { useLocaleStore } from "../../../store/useLocaleStore";
 import useThemeStore from "../../../store/useThemeStore";
 import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useTranslation } from "react-i18next";
 import { Plus, Edit2, Trash2, X, Loader2, RefreshCw, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { adminService } from "../../../services";
@@ -20,7 +19,6 @@ const EMPTY_FORM = {
 };
 
 export default function CategoriesPage() {
-  const { t, i18n } = useTranslation();
   const { language } = useLocaleStore();
   const { dark } = useThemeStore();
   const isAr = language === "ar";

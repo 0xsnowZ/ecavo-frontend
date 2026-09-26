@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { useCartStore } from "../store/useCartStore";
 import { useLocaleStore } from "../store/useLocaleStore";
+import { cartService } from "../services";
 import { getLocalized } from "../utils/localize";
 import { resolveImageUrl } from "../utils/imageUrl";
 
@@ -43,28 +44,18 @@ export default function Cart() {
     setCouponLoading(true);
     setCouponError("");
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/cart/apply-coupon`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: couponInput.toUpperCase() }),
-        },
+      const res = await cartService.applyCoupon(couponInput.toUpperCase());
+      const data = res.data;
+      applyCoupon({
+        code: data.coupon_code,
+        type: "applied",
+        value: data.discount,
+      });
+      setCouponInput("");
+    } catch (err) {
+      setCouponError(
+        err.response?.data?.message || (isAr ? "كود غير صالح" : "Invalid coupon")
       );
-      const data = await res.json();
-      if (!res.ok) {
-        setCouponError(
-          data.message || (isAr ? "كود غير صالح" : "Invalid coupon"),
-        );
-      } else {
-        applyCoupon({
-          code: data.coupon_code,
-          type: "applied",
-          value: data.discount,
-        });
-      }
-    } catch {
-      setCouponError(isAr ? "حدث خطأ" : "An error occurred");
     } finally {
       setCouponLoading(false);
     }

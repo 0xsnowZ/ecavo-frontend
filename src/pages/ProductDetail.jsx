@@ -52,7 +52,9 @@ export default function ProductDetail() {
   const [selectedStorage, setSelectedStorage] = useState(null);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [qty, setQty] = useState(1);
-  const [activeTab, setActiveTab] = useState("description"); // description | specifications | reviews
+  const [activeTab, setActiveTab] = useState(() => (
+    searchParams.get("review") || location.hash === "#reviews" ? "reviews" : "description"
+  ));
   const [addedToCart, setAddedToCart] = useState(false);
   const [eligibleItem, setEligibleItem] = useState(null);
   const [hasSubmittedReview, setHasSubmittedReview] = useState(false);
@@ -60,19 +62,20 @@ export default function ProductDetail() {
   // Auto-switch to reviews tab if coming from "Leave a Review" button
   useEffect(() => {
     if (searchParams.get("review") || location.hash === "#reviews") {
-      setActiveTab("reviews");
-      // Scroll to reviews section smoothly after a short delay
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        setActiveTab("reviews");
         document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' });
-      }, 500);
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [searchParams, location]);
 
   useEffect(() => {
-    setLoading(true);
+    let active = true;
     productsService
       .detail(slug)
       .then((r) => {
+        if (!active) return;
         const p = r.data.data;
         setProduct(p);
         // Auto-select first variant if exists
@@ -97,10 +100,14 @@ export default function ProductDetail() {
         if (isAuthenticated) {
           recentlyViewedService.track(p.id).catch(() => {});
         }
+        setLoading(false);
       })
-      .catch(() => navigate("/products"))
-      .finally(() => setLoading(false));
-  }, [slug, isAuthenticated]);
+      .catch(() => {
+        if (active) navigate("/products");
+      });
+
+    return () => { active = false; };
+  }, [slug, isAuthenticated, navigate]);
 
   // Fetch eligible items to check if user can review this product
   useEffect(() => {

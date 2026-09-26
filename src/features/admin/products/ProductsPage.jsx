@@ -1,8 +1,7 @@
 import { useLocaleStore } from "../../../store/useLocaleStore";
 import useThemeStore from "../../../store/useThemeStore";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useTranslation } from "react-i18next";
 import {
   Plus,
   Search,
@@ -46,11 +45,9 @@ const EMPTY_FORM = {
 };
 
 export default function ProductsPage() {
-  const { t, i18n } = useTranslation();
   const { language } = useLocaleStore();
   const { dark } = useThemeStore();
   const isAr = language === "ar";
-  const isFr = language === "fr";
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);

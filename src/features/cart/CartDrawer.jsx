@@ -15,14 +15,6 @@ export default function CartDrawer({ open, onClose }) {
 
   const fmt = (usd) => `${currency.symbol}${(usd * currency.rate).toFixed(2)}`;
 
-  // In RTL the drawer slides in from the LEFT (start), in LTR from the RIGHT (end)
-  // We use physical translateX to avoid RTL mirror issues
-  const slideClass = open
-    ? "translate-x-0"
-    : isRTL
-      ? "-translate-x-full"
-      : "translate-x-full";
-
   return (
     <>
       {/* Backdrop — click to close */}

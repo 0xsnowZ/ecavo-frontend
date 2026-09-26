@@ -7,7 +7,6 @@ import SearchBar from './SearchBar';
 import CartIcon from './CartIcon';
 import NavMenu from './NavMenu';
 import SidebarDrawer from './SidebarDrawer';
-import { useCartStore } from '../../../store/useCartStore';
 import { useAuthStore } from '../../../store/useAuthStore';
 
 export default function Header({ onCartOpen }) {

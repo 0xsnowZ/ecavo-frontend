@@ -73,7 +73,9 @@ export default function Account() {
   const handleLogout = async () => {
     try {
       await authService.logout();
-    } catch {}
+    } catch {
+      // Ignore network errors on logout and proceed with local logout
+    }
     logout();
     navigate("/");
   };

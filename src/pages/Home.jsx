@@ -16,7 +16,6 @@ import Skeleton from '../components/ui/Skeleton';
 import { productsService, recentlyViewedService } from '../services';
 import { getRvIds } from '../utils/recentlyViewed';
 import { resolveImages } from '../utils/imageUrl';
-import { getLocalized } from '../utils/localize';
 
 import bannerSm1 from '../assets/img/banner-sm-1.jpg';
 import bannerSm2 from '../assets/img/banner-sm-2.jpg';
@@ -92,9 +91,7 @@ function ProductCarousel({ products, loading, slidesPerView = { base: 2, sm: 3, 
 }
 
 export default function Home() {
-  const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
-
+  const { t } = useTranslation();
 
   const [deals, setDeals] = useState([]);
   const [sale, setSale] = useState([]);
@@ -107,7 +104,7 @@ export default function Home() {
   const [loadingElec, setLoadingElec] = useState(true);
   const [loadingMobiles, setLoadingMobiles] = useState(true);
   const [loadingAppliances, setLoadingAppliances] = useState(true);
-  const [loadingViewed, setLoadingViewed] = useState(true);
+  const [loadingViewed, setLoadingViewed] = useState(() => getRvIds().length > 0);
 
   // Featured deals — products with deal_ends_at set
   useEffect(() => {
@@ -156,18 +153,12 @@ export default function Home() {
   // Recently Viewed — always localStorage-driven (guests & auth users alike)
   useEffect(() => {
     const ids = getRvIds();
-    if (ids.length === 0) {
-      setViewed([]);
-      setLoadingViewed(false);
-      return;
-    }
-    setLoadingViewed(true);
+    if (ids.length === 0) return;
+
     recentlyViewedService.get(ids)
       .then(r => setViewed((r.data.data || []).map(p => toCard(p))))
       .catch(() => {})
       .finally(() => setLoadingViewed(false));
-  // Re-run only once on mount; isAuthenticated not needed here
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

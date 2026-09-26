@@ -19,7 +19,7 @@ import {
 import { useCartStore } from "../store/useCartStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useLocaleStore } from "../store/useLocaleStore";
-import { ordersService } from "../services";
+import { ordersService, cartService } from "../services";
 import { getLocalized } from "../utils/localize";
 import { resolveImageUrl } from "../utils/imageUrl";
 
@@ -38,7 +38,7 @@ const stripePromise = loadStripe(
 // ─────────────────────────────────────────────────────────────────────────────
 // StripePaymentSection — only rendered inside <Elements>, so hooks are safe
 // ─────────────────────────────────────────────────────────────────────────────
-function StripePaymentSection({ onConfirm, loading }) {
+function StripePaymentSection() {
   const stripe = useStripe();
   const elements = useElements();
 
@@ -115,23 +115,18 @@ function CheckoutForm({
     setCouponLoading(true);
     setCouponError("");
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/cart/apply-coupon`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: couponInput.toUpperCase() }),
-        },
+      const res = await cartService.applyCoupon(couponInput.toUpperCase());
+      const data = res.data;
+      applyCoupon({
+        code: data.coupon_code,
+        type: data.discount_type || 'applied',
+        value: data.discount ?? data.value
+      });
+      setCouponInput("");
+    } catch (err) {
+      setCouponError(
+        err.response?.data?.message || (isAr ? "كود غير صالح" : "Invalid coupon code")
       );
-      const data = await res.json();
-      if (!res.ok) {
-        setCouponError(data.message || (isAr ? "كود غير صالح" : "Invalid coupon code"));
-      } else {
-        applyCoupon({ code: data.coupon_code, type: data.discount_type, value: data.value });
-        setCouponInput("");
-      }
-    } catch {
-      setCouponError(isAr ? "حدث خطأ" : "An error occurred");
     } finally {
       setCouponLoading(false);
     }
@@ -623,6 +618,15 @@ function CheckoutForm({
                   <span>{t("cart.total")}</span>
                   <span className="text-primary">{fmt(getTotal())}</span>
                 </div>
+                {currency.code !== 'USD' && (
+                  <p className="text-[11px] text-muted dark:text-gray-400 mt-2 text-start leading-tight">
+                    {isAr
+                      ? `* يتم احتساب الدفع بـ $${getTotal().toFixed(2)} USD حسب سعر الصرف الحالي.`
+                      : isFr
+                        ? `* Le paiement sera débité en $${getTotal().toFixed(2)} USD selon le taux de change actuel.`
+                        : `* Payment will be processed as $${getTotal().toFixed(2)} USD based on current exchange rates.`}
+                  </p>
+                )}
               </div>
 
               {/* API Error */}
@@ -676,7 +680,7 @@ function CheckoutForm({
 // ─────────────────────────────────────────────────────────────────────────────
 // StripeCheckout — renders CheckoutForm INSIDE <Elements>, so hooks are safe
 // ─────────────────────────────────────────────────────────────────────────────
-function StripeCheckout({ onStripeSelected, stripeError, fetchingSecret, onConfirmStripe }) {
+function StripeCheckout({ onStripeSelected, stripeError, fetchingSecret }) {
   // These hooks are safe here because this component is ALWAYS inside <Elements>
   const stripe = useStripe();
   const elements = useElements();

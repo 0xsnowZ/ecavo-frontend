@@ -17,50 +17,18 @@ const SORT_OPTIONS = [
   { value: 'discount', labelAr: 'أكبر خصم', labelEn: 'Biggest Discount' },
 ];
 
-export default function Products() {
-  const { t, i18n } = useTranslation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const isAr = i18n.language === 'ar';
-
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [meta, setMeta] = useState({ total: 0, current_page: 1, last_page: 1 });
-  const [loading, setLoading] = useState(true);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-
-  // Params from URL
-  const page = parseInt(searchParams.get('page') || '1');
-  const sort = searchParams.get('sort') || 'latest';
-  const category = searchParams.get('category') || '';
-  const search = searchParams.get('search') || '';
-  const minPrice = searchParams.get('min_price') || '';
-  const maxPrice = searchParams.get('max_price') || '';
-
-  const setParam = (key, value) => {
-    const p = new URLSearchParams(searchParams);
-    if (value) { p.set(key, value); } else { p.delete(key); }
-    if (key !== 'page') p.delete('page');
-    setSearchParams(p);
-  };
-
-  // Load categories once
-  useEffect(() => {
-    categoriesService.all().then(r => setCategories(r.data.data || []));
-  }, []);
-
-  // Load products when params change
-  useEffect(() => {
-    setLoading(true);
-    productsService.list({ page, sort, category, search, min_price: minPrice, max_price: maxPrice, per_page: 16 })
-      .then(r => {
-        setProducts(r.data.data || []);
-        setMeta(r.data.meta || { total: 0, current_page: 1, last_page: 1 });
-      })
-      .catch(() => setProducts([]))
-      .finally(() => setLoading(false));
-  }, [page, sort, category, search, minPrice, maxPrice]);
-
-  const FilterPanel = () => (
+function FilterPanel({
+  t,
+  isAr,
+  i18n,
+  categories,
+  category,
+  minPrice,
+  maxPrice,
+  setParam,
+  onReset,
+}) {
+  return (
     <div className="space-y-6">
       {/* Categories */}
       <div>
@@ -115,7 +83,7 @@ export default function Products() {
       {/* Reset */}
       {(category || minPrice || maxPrice) && (
         <button
-          onClick={() => setSearchParams({})}
+          onClick={onReset}
           className="w-full btn-outline text-sm py-2 justify-center"
         >
           <X size={14} />
@@ -124,6 +92,56 @@ export default function Products() {
       )}
     </div>
   );
+}
+
+export default function Products() {
+  const { t, i18n } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isAr = i18n.language === 'ar';
+
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, current_page: 1, last_page: 1 });
+  const [loading, setLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Params from URL
+  const page = parseInt(searchParams.get('page') || '1');
+  const sort = searchParams.get('sort') || 'latest';
+  const category = searchParams.get('category') || '';
+  const search = searchParams.get('search') || '';
+  const minPrice = searchParams.get('min_price') || '';
+  const maxPrice = searchParams.get('max_price') || '';
+
+  const setParam = (key, value) => {
+    const p = new URLSearchParams(searchParams);
+    if (value) { p.set(key, value); } else { p.delete(key); }
+    if (key !== 'page') p.delete('page');
+    setSearchParams(p);
+  };
+
+  // Load categories once
+  useEffect(() => {
+    categoriesService.all().then(r => setCategories(r.data.data || []));
+  }, []);
+
+  // Load products when params change
+  useEffect(() => {
+    let active = true;
+    productsService.list({ page, sort, category, search, min_price: minPrice, max_price: maxPrice, per_page: 16 })
+      .then(r => {
+        if (!active) return;
+        setProducts(r.data.data || []);
+        setMeta(r.data.meta || { total: 0, current_page: 1, last_page: 1 });
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setProducts([]);
+        setLoading(false);
+      });
+    return () => { active = false; };
+  }, [page, sort, category, search, minPrice, maxPrice]);
 
   return (
     <>
@@ -143,7 +161,17 @@ export default function Products() {
               <h2 className="section-title text-lg mb-4">
                 {isAr ? 'تصفية النتائج' : 'Filter Results'}
               </h2>
-              <FilterPanel />
+              <FilterPanel
+                t={t}
+                isAr={isAr}
+                i18n={i18n}
+                categories={categories}
+                category={category}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                setParam={setParam}
+                onReset={() => setSearchParams({})}
+              />
             </div>
           </aside>
 
@@ -284,7 +312,17 @@ export default function Products() {
                   <X size={20} />
                 </button>
               </div>
-              <FilterPanel />
+              <FilterPanel
+                t={t}
+                isAr={isAr}
+                i18n={i18n}
+                categories={categories}
+                category={category}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                setParam={setParam}
+                onReset={() => setSearchParams({})}
+              />
             </div>
           </div>
         )}

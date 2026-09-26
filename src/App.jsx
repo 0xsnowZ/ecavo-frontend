@@ -7,6 +7,7 @@ import router from './router';
 import { useLocaleStore } from './store/useLocaleStore';
 import { useAuthStore } from './store/useAuthStore';
 import { authService } from './services';
+import ToastProvider from './components/ui/ToastProvider';
 import i18n from './i18n';
 
 export default function App() {
@@ -40,10 +41,12 @@ export default function App() {
     if (i18n.language !== language) {
       i18n.changeLanguage(language);
     }
-  }, []);
+  }, [language]);
 
   // Fetch live exchange rates once per session
-  useEffect(() => { fetchRates(); }, []);
+  useEffect(() => {
+    fetchRates();
+  }, [fetchRates]);
 
   // Sync dir/lang attribute on language change
   useEffect(() => {
@@ -55,6 +58,7 @@ export default function App() {
     <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
       <HelmetProvider>
         <RouterProvider router={router} />
+        <ToastProvider />
       </HelmetProvider>
     </ErrorBoundary>
   );

@@ -57,19 +57,16 @@ export default function OrderConfirm() {
   const fmt = (usd) => `${currency.symbol}${(usd * currency.rate).toFixed(2)}`;
 
   const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isAuthenticated);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      setLoading(false);
-      return;
-    }
+    if (!isAuthenticated) return;
     ordersService
       .detail(id)
       .then((r) => setOrder(r.data.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, isAuthenticated]);
 
   if (loading)
     return (

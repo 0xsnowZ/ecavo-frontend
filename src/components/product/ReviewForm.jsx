@@ -33,7 +33,7 @@ function StarPicker({ value, onChange }) {
 }
 
 export default function ReviewForm({ orderItemId, onSuccess }) {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   const isFr = i18n.language === 'fr';
   

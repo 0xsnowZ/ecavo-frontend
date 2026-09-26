@@ -2,7 +2,6 @@ import { useLocaleStore } from "../../../store/useLocaleStore";
 import useThemeStore from "../../../store/useThemeStore";
 import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useTranslation } from "react-i18next";
 import { Plus, Edit2, Trash2, X, Loader2, RefreshCw, Tag, Wand2, Ticket, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { adminCouponsService } from "../../../services";
@@ -20,7 +19,6 @@ const EMPTY_FORM = {
 };
 
 export default function CouponsPage() {
-  const { t, i18n } = useTranslation();
   const { language } = useLocaleStore();
   const { dark } = useThemeStore();
   const isAr = language === "ar";
@@ -110,7 +108,7 @@ export default function CouponsPage() {
         isAr ? "تم حذف الكوبون بنجاح ✓" : "Coupon deleted successfully"
       );
       fetchCoupons();
-    } catch (err) {
+    } catch (_err) {
       toast.error(isAr ? "فشل الحذف" : "Failed to delete coupon");
     } finally {
       setDeleting(null);
@@ -124,7 +122,7 @@ export default function CouponsPage() {
       toast.success(
         isAr ? "تم تحديث حالة الكوبون" : "Coupon status updated"
       );
-    } catch (err) {
+    } catch (_err) {
       toast.error(isAr ? "فشل التحديث" : "Failed to update status");
     }
   };

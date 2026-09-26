@@ -16,11 +16,10 @@ import {
   Ticket,
   Image as ImageIcon,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import useThemeStore from "../store/useThemeStore";
 import { useLocaleStore } from "../store/useLocaleStore";
-import ToastProvider from "../components/ui/ToastProvider";
 import { adminNotificationsService } from "../services";
 
 const adminLinks = [
@@ -78,17 +77,20 @@ export default function AdminLayout() {
   const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       const { data } = await adminNotificationsService.getAll();
       setNotifications(data);
     } catch (error) {
       console.error("Failed to load notifications", error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchNotifications();
+    adminNotificationsService.getAll()
+      .then(({ data }) => setNotifications(data))
+      .catch((error) => console.error("Failed to load notifications", error));
+
     const handleClickOutside = (event) => {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
         setShowNotifications(false);
@@ -361,9 +363,6 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
-
-      {/* Toast notifications */}
-      <ToastProvider />
     </div>
   );
 }

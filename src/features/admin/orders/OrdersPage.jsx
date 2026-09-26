@@ -2,7 +2,6 @@ import { useLocaleStore } from "../../../store/useLocaleStore";
 import useThemeStore from "../../../store/useThemeStore";
 import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useTranslation } from "react-i18next";
 import { Search, RefreshCw, ChevronDown, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { adminService } from "../../../services";
@@ -77,7 +76,6 @@ const STATUS_COLOR = {
 };
 
 export default function OrdersPage() {
-  const { t, i18n } = useTranslation();
   const { language } = useLocaleStore();
   const { dark } = useThemeStore();
   const isAr = language === "ar";
