@@ -38,42 +38,28 @@ export default function BrandLogo({
         xmlns="http://www.w3.org/2000/svg"
         className="shrink-0 transition-transform duration-300 hover:scale-105"
       >
-        <defs>
-          <linearGradient id={`ecavo-grad-${size}`} x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FF525D" />
-            <stop offset="100%" stopColor="#E63946" />
-          </linearGradient>
-          <linearGradient id={`ecavo-handle-${size}`} x1="16" y1="4" x2="32" y2="16" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor={isWhite ? "#E2E8F0" : "#1D3557"} />
-            <stop offset="100%" stopColor={isWhite ? "#CBD5E1" : "#0F1F38"} />
-          </linearGradient>
-        </defs>
-        {/* Handle */}
+        {/* Handle in warm orange/peach */}
         <path
-          d="M17 16V11C17 7.134 20.134 4 24 4C27.866 4 31 7.134 31 11V16"
-          stroke={`url(#ecavo-handle-${size})`}
+          d="M17 17V10C17 6.134 20.134 3 24 3C27.866 3 31 6.134 31 10V17"
+          stroke="#F4A261"
           strokeWidth="3.5"
           strokeLinecap="round"
         />
         {/* Main Bag Body */}
         <rect
-          x="7"
+          x="6"
           y="15"
-          width="34"
-          height="28"
-          rx="8"
-          fill={`url(#ecavo-grad-${size})`}
+          width="36"
+          height="30"
+          rx="9"
+          fill="#E63946"
         />
-        {/* Monogram E */}
-        <path
-          d="M18 24H30M18 29H27M18 34H30"
-          stroke="#FFFFFF"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* Accent Sparkle */}
-        <circle cx="34" cy="20.5" r="1.8" fill="#FFF2F3" />
+        {/* White Monogram E Stripes */}
+        <rect x="15" y="22" width="16" height="3.5" rx="1.75" fill="#FFFFFF" />
+        <rect x="15" y="28" width="11" height="3.5" rx="1.75" fill="#FFFFFF" />
+        <rect x="15" y="34" width="16" height="3.5" rx="1.75" fill="#FFFFFF" />
+        {/* White Accent Dot */}
+        <circle cx="34" cy="20" r="1.8" fill="#FFFFFF" />
       </svg>
 
       {/* Typography */}
